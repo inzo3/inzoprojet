@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Profil propriétaire{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-hero {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.06), rgba(37, 99, 235, 0.12));
+    border-radius: 24px;
+  }
+
+  .avatar-ring {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    padding: 4px;
+    background: linear-gradient(135deg, var(--lh-accent), var(--lh-primary));
+  }
+
+  .avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #fff;
+  }
+
+  .stat-tile {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(17, 24, 39, 0.06);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(37, 99, 235, 0.12);
+    color: var(--lh-primary);
+    font-size: 22px;
+  }
+
+  .panel-card {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(17, 24, 39, 0.06);
+  }
+
+  .pill {
+    border-radius: 999px;
+  }
+
+  .listing-thumb {
+    width: 64px;
+    height: 48px;
+    object-fit: cover;
+  }
+
+  .table td,
+  .table th {
+    vertical-align: middle;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'annonces:index' %}">Accueil</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Profil propriétaire</li>
+    </ol>
+  </nav>
+
+  <section class="profile-hero p-4 p-lg-5 mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="d-flex align-items-center gap-3 gap-md-4">
+          <div class="avatar-ring">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="Photo de profil" />
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="Photo de profil" />
+            {% endif %}
+          </div>
+          <div>
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+              <h1 class="h3 fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h1>
+              <span class="badge text-bg-primary pill">Propriétaire</span>
+              {% if proprietaire %}
+              <span class="badge text-bg-warning text-dark pill">
+                <i class="bi bi-star-fill me-1"></i>{{ proprietaire.rating|default:"0.0" }} ({{ proprietaire.total_avis }} avis)
+              </span>
+              {% endif %}
+            </div>
+            <div class="text-muted d-flex flex-wrap gap-3">
+              {% if proprietaire.is_premium %}
+              <span><i class="bi bi-building me-1"></i>LocaHome Premium</span>
+              {% endif %}
+              {% if proprietaire.zone_principale %}
+              <span><i class="bi bi-geo-alt me-1"></i>{{ proprietaire.zone_principale }}</span>
+              {% endif %}
+              {% if user.is_verified %}
+              <span><i class="bi bi-shield-check me-1"></i>Profil vérifié</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-lg-end">
+          <button type="button" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+            <i class="bi bi-pencil-square me-2"></i>Modifier le profil
+          </button>
+          <a href="#" class="btn btn-primary btn-lg rounded-pill px-4">
+            <i class="bi bi-plus-circle me-2"></i>Nouvelle annonce
+          </a>
+        </div>
+        {% if proprietaire %}
+        <div class="text-muted small mt-3 text-lg-end">
+          Dernière publication : {% if proprietaire.annonces.first %}{{ proprietaire.annonces.first.created_at|timesince }}{% else %}Aucune{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card stat-tile p-4 h-100">
+        <div class="d-flex align-items-center gap-3">
+          <span class="stat-icon"><i class="bi bi-megaphone"></i></span>
+          <div>
+            <div class="text-muted">Annonces actives</div>
+            <div class="fw-bold fs-4">{{ annonces_actives|default:0 }}</div>
+          </div>
+        </div>
+        <div class="text-muted small mt-3">Biens visibles sur la plateforme.</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-tile p-4 h-100">
+        <div class="d-flex align-items-center gap-3">
+          <span class="stat-icon" style="background-color: rgba(245, 158, 11, 0.18); color: var(--lh-accent);">
+            <i class="bi bi-eye"></i>
+          </span>
+          <div>
+            <div class="text-muted">Vues (30j)</div>
+            <div class="fw-bold fs-4">{{ total_vues|default:0 }}</div>
+          </div>
+        </div>
+        <div class="text-muted small mt-3">Trafic des annonces sur 30 jours.</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-tile p-4 h-100">
+        <div class="d-flex align-items-center gap-3">
+          <span class="stat-icon" style="background-color: rgba(16, 185, 129, 0.14); color: var(--lh-secondary);">
+            <i class="bi bi-person-check"></i>
+          </span>
+          <div>
+            <div class="text-muted">Leads</div>
+            <div class="fw-bold fs-4">0</div>
+          </div>
+        </div>
+        <div class="text-muted small mt-3">Demandes et contacts reçus.</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-tile p-4 h-100">
+        <div class="d-flex align-items-center gap-3">
+          <span class="stat-icon" style="background-color: rgba(99, 102, 241, 0.14); color: #4f46e5;">
+            <i class="bi bi-cash-coin"></i>
+          </span>
+          <div>
+            <div class="text-muted">Revenus (30j)</div>
+            <div class="fw-bold fs-4">0</div>
+          </div>
+        </div>
+        <div class="text-muted small mt-3">FCFA générés via premium.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row g-4">
+    <div class="col-lg-4">
+      <div class="card panel-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h2 class="h5 fw-semibold mb-1">À propos</h2>
+            <div class="text-muted small">Informations publiques</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary rounded-pill">
+            <i class="bi bi-pencil-square me-1"></i>Modifier
+          </button>
+        </div>
+
+        <div class="d-grid gap-3">
+          <div class="p-3 bg-light rounded-4">
+            <div class="text-muted small">Téléphone</div>
+            <div class="fw-semibold">{{ user.phone|default:"Non renseigné" }}</div>
+          </div>
+          <div class="p-3 bg-light rounded-4">
+            <div class="text-muted small">Email</div>
+            <div class="fw-semibold">{{ user.email }}</div>
+          </div>
+          {% if proprietaire %}
+          <div class="p-3 bg-light rounded-4">
+            <div class="text-muted small">Zone principale</div>
+            <div class="fw-semibold">{{ proprietaire.zone_principale|default:"Non renseigné" }}</div>
+          </div>
+          <div class="p-3 bg-light rounded-4">
+            <div class="text-muted small">Temps de réponse</div>
+            <div class="fw-semibold">{{ proprietaire.temps_reponse|default:"Non renseigné" }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card panel-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div>
+            <h2 class="h5 fw-semibold mb-1">Mes annonces</h2>
+            <div class="text-muted small">Gestion des biens publiés</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill">
+              <i class="bi bi-funnel me-1"></i>Filtrer
+            </button>
+            <a href="#" class="btn btn-sm btn-primary rounded-pill">
+              <i class="bi bi-plus-circle me-1"></i>Nouvelle
+            </a>
+          </div>
+        </div>
+
+        {% if proprietaire and proprietaire.annonces.all %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Annonce</th>
+                <th>Prix</th>
+                <th>Vues</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for annonce in proprietaire.annonces.all|slice:":5" %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    {% if annonce.images.first %}
+                    <img src="{{ annonce.images.first.image.url }}" alt="Aperçu annonce" class="rounded-3 listing-thumb" />
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=200&q=80" alt="Aperçu annonce" class="rounded-3 listing-thumb" />
+                    {% endif %}
+                    <div>
+                      <div class="fw-semibold">{{ annonce.titre }}</div>
+                      <div class="text-muted small">{{ annonce.ville }} • {{ annonce.quartier }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge bg-primary-subtle text-primary pill">{{ annonce.prix }} FCFA</span></td>
+                <td>{{ annonce.nombre_vues }}</td>
+                <td>
+                  {% if annonce.statut == 'active' %}
+                  <span class="badge text-bg-success pill">Active</span>
+                  {% elif annonce.statut == 'en_attente' %}
+                  <span class="badge text-bg-warning pill">En attente</span>
+                  {% else %}
+                  <span class="badge text-bg-secondary pill">Désactivée</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">Voir</a>
+                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill">Modifier</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted"></i>
+          <p class="text-muted mt-3">Aucune annonce pour le moment.</p>
+          <a href="#" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-circle me-2"></i>Créer votre première annonce
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

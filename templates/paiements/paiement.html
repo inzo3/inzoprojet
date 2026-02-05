@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Débloquer le contact{% endblock %}
+
+{% block extra_css %}
+<style>
+  .payment-hero {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.12));
+    border-radius: 24px;
+    padding: 3rem;
+  }
+
+  .payment-card {
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  }
+
+  .payment-summary {
+    background-color: #f8f9fa;
+    border-radius: 16px;
+    padding: 2rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="payment-hero mb-4">
+        <div class="text-center mb-4">
+          <h1 class="display-5 fw-bold mb-3">Débloquer le contact</h1>
+          <p class="lead text-muted">
+            Paiement sécurisé via Mobile Money. Accédez instantanément aux informations complètes.
+          </p>
+        </div>
+      </div>
+
+      <div class="card payment-card">
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="payment-summary h-100">
+                <h5 class="fw-semibold mb-4">Résumé</h5>
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Propriété</span>
+                    <span class="fw-semibold text-end">{{ annonce.titre }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Ville</span>
+                    <span class="fw-semibold">{{ annonce.ville }}, {{ annonce.quartier }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Prix</span>
+                    <span class="fw-semibold">{{ annonce.prix }} FCFA / mois</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="text-muted">Montant à payer</span>
+                    <span class="badge text-bg-primary fs-6 px-3 py-2">1000 FCFA</span>
+                  </div>
+                </div>
+                <div>
+                  <h6 class="fw-semibold mb-3">Vous débloquez</h6>
+                  <ul class="list-unstyled d-grid gap-2 small mb-0">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Numéro de téléphone complet</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Adresse exacte + carte détaillée</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Messagerie directe illimitée</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Bonus 3 autres déblocages inclus</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <form method="post" class="d-grid gap-3">
+                {% csrf_token %}
+                <div>
+                  <label for="phonePayment" class="form-label fw-semibold">Numéro Mobile Money</label>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text">+242</span>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      id="phonePayment"
+                      name="phonePayment"
+                      placeholder="06 123 45 67"
+                      required
+                    />
+                  </div>
+                  <div class="form-text">
+                    Indiquez le numéro Mobile Money associé à votre compte.
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label fw-semibold">Méthode de paiement</label>
+                  <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="mtn"
+                        value="mtn"
+                        checked
+                      />
+                      <label class="form-check-label" for="mtn">
+                        <span class="fw-semibold">MTN Money</span>
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="airtel"
+                        value="airtel"
+                      />
+                      <label class="form-check-label" for="airtel">
+                        <span class="fw-semibold">Airtel Money</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="small text-muted d-flex align-items-center gap-2">
+                  <i class="bi bi-shield-lock"></i>
+                  Paiement sécurisé par FedaPay
+                </div>
+                <div class="d-flex gap-3">
+                  <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-secondary w-50">
+                    Annuler
+                  </a>
+                  <button type="submit" class="btn btn-primary w-100">
+                    Payer 1000 FCFA
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h6 class="fw-semibold mb-3">Rappels rapides</h6>
+          <ul class="list-unstyled d-grid gap-3 mb-0 small">
+            <li class="d-flex align-items-start gap-3">
+              <span class="text-primary fs-4"><i class="bi bi-shield-check"></i></span>
+              <span>Les paiements sont sécurisés via FedaPay, MTN Money ou Airtel Money.</span>
+            </li>
+            <li class="d-flex align-items-start gap-3">
+              <span class="text-primary fs-4"><i class="bi bi-info-circle"></i></span>
+              <span>Le contact débloqué reste accessible pendant 30 jours.</span>
+            </li>
+            <li class="d-flex align-items-start gap-3">
+              <span class="text-primary fs-4"><i class="bi bi-building"></i></span>
+              <span>LocaHome vérifie chaque propriétaire avant publication.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,214 @@
+:root {
+  --auth-primary: #0f172a;
+  --auth-accent: #111827;
+  --auth-muted: #6b7280;
+  --auth-neutral: #f9fafb;
+  --auth-border: #e5e7eb;
+  --auth-radius-xl: 32px;
+  --auth-radius-lg: 24px;
+  --auth-radius-md: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: var(--auth-accent);
+  background: linear-gradient(135deg, #f1f5f9, #ffffff);
+}
+
+.auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-wrapper {
+  width: 100%;
+}
+
+.auth-card {
+  background-color: #ffffff;
+  border-radius: var(--auth-radius-xl);
+  box-shadow: 0 40px 120px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.auth-card .form-label {
+  font-weight: 600;
+  color: var(--auth-accent);
+}
+
+.auth-card .form-control {
+  border-radius: var(--auth-radius-md);
+  border: 1px solid var(--auth-border);
+  padding: 14px 16px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-card .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+}
+
+.auth-card .btn-dark {
+  background-color: var(--auth-primary);
+  border-color: var(--auth-primary);
+  border-radius: var(--auth-radius-md);
+  padding: 14px 16px;
+  font-weight: 600;
+}
+
+.auth-card .btn-outline-secondary {
+  border-radius: var(--auth-radius-md);
+  border-color: var(--auth-border);
+  color: var(--auth-accent);
+  background-color: #ffffff;
+  font-weight: 600;
+  padding: 14px 16px;
+}
+
+.auth-card .btn-outline-secondary:hover {
+  border-color: rgba(15, 23, 42, 0.2);
+  background-color: var(--auth-neutral);
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-social:hover,
+.btn-social:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.12);
+  background-color: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.auth-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.separator-line {
+  display: block;
+  height: 1px;
+  background-color: var(--auth-border);
+}
+
+.auth-visual {
+  height: 100%;
+  background-color: var(--auth-primary);
+  position: relative;
+}
+
+.auth-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.register-card {
+  background-color: #ffffff;
+  border-radius: var(--auth-radius-xl);
+  box-shadow: 0 30px 100px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.register-card .form-control {
+  border-radius: var(--auth-radius-md);
+  border: 1px solid var(--auth-border);
+  padding: 14px 16px;
+}
+
+.role-selector {
+  position: relative;
+}
+
+.role-selector .btn-check {
+  position: absolute;
+  clip: rect(0 0 0 0);
+}
+
+.role-option {
+  display: block;
+  border-radius: var(--auth-radius-md);
+  border: 1px solid var(--auth-border);
+  background-color: #ffffff;
+  padding: 16px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.role-option:hover {
+  border-color: rgba(15, 23, 42, 0.3);
+  transform: translateY(-2px);
+}
+
+.role-selector .btn-check:checked + .role-option {
+  border-color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+}
+
+.role-option .role-title {
+  display: block;
+  font-weight: 600;
+  color: var(--auth-accent);
+}
+
+.role-option .role-caption {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--auth-muted);
+  margin-top: 4px;
+}
+
+.register-card .btn-primary {
+  border-radius: var(--auth-radius-md);
+  padding: 14px 16px;
+  font-weight: 600;
+}
+
+.register-card .badge {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 991.98px) {
+  .auth-card,
+  .register-card {
+    border-radius: var(--auth-radius-lg);
+  }
+
+  .role-option {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .auth-card,
+  .register-card {
+    border-radius: var(--auth-radius-md);
+  }
+
+  .auth-card .btn-lg,
+  .register-card .btn-lg,
+  .auth-card .form-control,
+  .register-card .form-control {
+    padding: 12px 14px;
+  }
+
+  .role-option {
+    padding: 12px 14px;
+  }
+}

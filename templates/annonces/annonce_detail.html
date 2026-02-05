@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • {{ annonce.titre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--lh-primary);
+  }
+
+  .gallery-main {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .gallery-main img {
+    object-fit: cover;
+    width: 100%;
+    max-height: 520px;
+  }
+
+  .gallery-thumbs img {
+    border-radius: 12px;
+    cursor: pointer;
+    height: 110px;
+    object-fit: cover;
+    width: 100%;
+    transition: transform 0.25s ease;
+  }
+
+  .gallery-thumbs img:hover {
+    transform: translateY(-4px);
+  }
+
+  .badge-premium {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background-color: var(--lh-accent);
+    color: #111827;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
+  }
+
+  .blurred-map {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .blurred-map::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(6px);
+    background-color: rgba(17, 24, 39, 0.35);
+  }
+
+  .listing-features span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background-color: var(--lh-light);
+    color: var(--lh-dark);
+    font-weight: 500;
+  }
+
+  .sticky-card {
+    position: sticky;
+    top: 96px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+  }
+
+  .contact-mask {
+    filter: blur(4px);
+    user-select: none;
+  }
+
+  .similar-card img {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .modal-content {
+    border-radius: 24px;
+    border: none;
+  }
+
+  .modal-header {
+    border-bottom: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="bg-light py-3">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'annonces:index' %}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="#">{{ annonce.ville }}</a></li>
+        <li class="breadcrumb-item"><a href="#">{{ annonce.get_type_bien_display }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ annonce.titre }}</li>
+      </ol>
+    </nav>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="gallery-main mb-3">
+          {% if annonce.is_premium %}
+          <span class="badge-premium">Premium</span>
+          {% endif %}
+          {% if images.first %}
+          <img src="{{ images.first.image.url }}" alt="Galerie principale" id="mainImage" />
+          {% else %}
+          <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80" alt="Galerie principale" id="mainImage" />
+          {% endif %}
+          <div class="position-absolute bottom-0 end-0 m-3 badge text-bg-dark rounded-pill px-3 py-2">
+            <span id="imageCounter">1</span> / {{ images.count|default:1 }} photos
+          </div>
+        </div>
+        {% if images.count > 1 %}
+        <div class="row row-cols-2 row-cols-md-5 g-3 gallery-thumbs">
+          {% for image in images|slice:":5" %}
+          <div class="col">
+            <img class="w-100 thumb-image" src="{{ image.image.url }}" alt="Miniature" onclick="changeMainImage('{{ image.image.url }}')" />
+          </div>
+          {% endfor %}
+          {% if images.count > 5 %}
+          <div class="col">
+            <div class="position-relative overflow-hidden rounded-3" style="height: 110px;">
+              {% with images_list=images|slice:":6" %}
+                {% for img in images_list %}
+                  {% if forloop.counter == 6 %}
+                  <img class="w-100 h-100" src="{{ img.image.url }}" alt="Miniature" style="object-fit: cover;" />
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+              <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 text-white fw-semibold">
+                +{{ images.count|add:"-5" }} photos
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="mt-4 pb-3 border-bottom">
+          <h1 class="fw-bold display-6 mb-2">{{ annonce.titre }}</h1>
+          <div class="d-flex flex-wrap gap-3 text-muted">
+            <span><i class="bi bi-geo-alt"></i> {{ annonce.ville }}, {{ annonce.quartier }}</span>
+            <span><i class="bi bi-calendar3"></i> Disponible immédiatement</span>
+            <span><i class="bi bi-eye"></i> {{ annonce.nombre_vues }} vues</span>
+          </div>
+        </div>
+
+        <div class="py-4 border-bottom">
+          <div class="d-flex align-items-center flex-wrap gap-4 mb-4">
+            <span class="badge text-bg-primary px-3 py-2 rounded-pill fs-5">{{ annonce.prix }} FCFA / mois</span>
+            <div class="listing-features d-flex flex-wrap gap-3">
+              <span><i class="bi bi-house-door"></i> {{ annonce.get_type_bien_display }}</span>
+              <span><i class="bi bi-aspect-ratio"></i> {{ annonce.superficie }} m²</span>
+              <span><i class="bi bi-door-open"></i> {{ annonce.nombre_chambres }} chambres</span>
+              <span><i class="bi bi-droplet"></i> {{ annonce.nombre_salles_bain }} salles de bain</span>
+            </div>
+          </div>
+          <h4 class="fw-semibold mb-3">Description</h4>
+          <p class="text-muted">{{ annonce.description|linebreaks }}</p>
+        </div>
+
+        {% if equipements %}
+        <div class="py-4 border-bottom">
+          <h4 class="fw-semibold mb-3">Équipements</h4>
+          <div class="row row-cols-1 row-cols-md-2 g-3">
+            {% for annonce_equipement in equipements %}
+            <div class="col">
+              <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                <span class="text-primary fs-4"><i class="bi bi-{{ annonce_equipement.equipement.icone|default:'check-circle' }}"></i></span>
+                <div>
+                  <h6 class="mb-0">{{ annonce_equipement.equipement.nom }}</h6>
+                  {% if annonce_equipement.description %}
+                  <small class="text-muted">{{ annonce_equipement.description }}</small>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="py-4 border-bottom">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-semibold mb-0">Localisation</h4>
+            <span class="badge text-bg-warning text-dark">Localisation approximative (rayon 500 m)</span>
+          </div>
+          <div class="blurred-map rounded-4 overflow-hidden">
+            {% if annonce.latitude and annonce.longitude %}
+            <iframe
+              width="100%"
+              height="400"
+              style="border:0"
+              loading="lazy"
+              allowfullscreen
+              src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q={{ annonce.latitude }},{{ annonce.longitude }}&zoom=15">
+            </iframe>
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1502920917128-1aa500764b81?auto=format&fit=crop&w=1400&q=80" class="w-100" alt="Carte" />
+            {% endif %}
+            <div class="position-absolute top-50 start-50 translate-middle text-white text-center px-4" style="z-index: 10;">
+              <i class="bi bi-lock fs-1 mb-2 d-block"></i>
+              <p class="mb-3">Débloquez le contact pour afficher l'adresse exacte et la carte détaillée.</p>
+              <a href="{% url 'paiements:paiement' annonce_id=annonce.pk %}" class="btn btn-primary rounded-pill px-4">
+                Voir l'adresse exacte - 1000 FCFA
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {% if annonces_similaires %}
+        <div class="py-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-semibold mb-0">Annonces similaires</h4>
+            <a href="{% url 'annonces:recherche' %}?type={{ annonce.type_bien }}&ville={{ annonce.ville }}" class="btn btn-outline-primary btn-sm rounded-pill">Voir tout</a>
+          </div>
+          <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for annonce_similaire in annonces_similaires %}
+            <div class="col">
+              <div class="card border-0 shadow-sm similar-card">
+                {% if annonce_similaire.images.first %}
+                <img src="{{ annonce_similaire.images.first.image.url }}" class="card-img-top" alt="Similaire" />
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Similaire" />
+                {% endif %}
+                <div class="card-body">
+                  <span class="badge text-bg-primary rounded-pill mb-2">{{ annonce_similaire.prix }} FCFA</span>
+                  <h5 class="card-title">{{ annonce_similaire.titre }}</h5>
+                  <p class="text-muted small">
+                    <i class="bi bi-geo-alt"></i> {{ annonce_similaire.ville }} • {{ annonce_similaire.nombre_chambres }} ch • {{ annonce_similaire.nombre_salles_bain }} sdb • {{ annonce_similaire.superficie }} m²
+                  </p>
+                  <a href="{% url 'annonces:annonce_detail' pk=annonce_similaire.pk %}" class="btn btn-outline-primary w-100">Voir l'annonce</a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-5">
+        <div class="sticky-card">
+          <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                {% if annonce.proprietaire.user.avatar %}
+                <img src="{{ annonce.proprietaire.user.avatar.url }}" alt="Propriétaire" class="rounded-circle contact-mask" width="64" height="64" />
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="Propriétaire" class="rounded-circle contact-mask" width="64" height="64" />
+                {% endif %}
+                <div>
+                  <h6 class="fw-semibold mb-1 contact-mask">{{ annonce.proprietaire.user.get_full_name|default:annonce.proprietaire.user.username }} (Propriétaire)</h6>
+                  <div class="d-flex align-items-center gap-2 text-warning">
+                    <span class="fw-semibold text-dark">{{ annonce.proprietaire.rating|default:"0.0" }}</span>
+                    <div>
+                      {% with rating_int=annonce.proprietaire.rating|floatformat:0|add:0 %}
+                        {% for i in "12345"|make_list %}
+                          {% if forloop.counter <= rating_int %}
+                          <i class="bi bi-star-fill"></i>
+                          {% else %}
+                          <i class="bi bi-star"></i>
+                          {% endif %}
+                        {% endfor %}
+                      {% endwith %}
+                    </div>
+                    <span class="text-muted">({{ annonce.proprietaire.total_avis }} avis)</span>
+                  </div>
+                  {% if annonce.proprietaire.user.is_verified %}
+                  <span class="badge text-bg-success mt-2">Profil vérifié</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted">Téléphone</span>
+                  <span class="fw-semibold contact-mask">06 *** ** **</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Email</span>
+                  <span class="fw-semibold contact-mask">contact@******.com</span>
+                </div>
+              </div>
+              <a href="{% url 'paiements:paiement' annonce_id=annonce.pk %}" class="btn btn-primary w-100 btn-lg rounded-pill mb-3">
+                <i class="bi bi-credit-card me-2"></i> Débloquer le contact - 1000 FCFA
+              </a>
+              <div class="d-grid gap-2 mb-4">
+                <a href="{% url 'messagerie:envoyer_message' annonce_id=annonce.pk %}" class="btn btn-outline-primary rounded-pill">
+                  <i class="bi bi-chat-dots me-2"></i> Envoyer un message
+                </a>
+                {% if user.is_authenticated %}
+                  {% if is_favori %}
+                  <a href="{% url 'messagerie:retirer_favori' annonce_id=annonce.pk %}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="bi bi-heart-fill me-2"></i> Retirer des favoris
+                  </a>
+                  {% else %}
+                  <a href="{% url 'messagerie:ajouter_favori' annonce_id=annonce.pk %}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="bi bi-heart me-2"></i> Ajouter aux favoris
+                  </a>
+                  {% endif %}
+                {% endif %}
+              </div>
+              <div class="p-3 bg-light rounded-3">
+                <h6 class="fw-semibold mb-2">Avantages du déblocage</h6>
+                <ul class="list-unstyled d-grid gap-2 mb-0 small">
+                  <li><i class="bi bi-check-circle text-success me-2"></i> Numéro complet & adresse exacte</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i> Messagerie directe illimitée</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i> Bonus 3 déblocages supplémentaires</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function changeMainImage(src) {
+    document.getElementById('mainImage').src = src;
+  }
+</script>
+{% endblock %}

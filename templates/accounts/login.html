@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Connexion{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="auth-body">
+  <div class="auth-wrapper container-fluid py-5">
+    <div class="auth-card container">
+      <div class="row g-0">
+        <div class="col-lg-6 p-5">
+          <div class="mb-4">
+            <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">Bon retour</span>
+          </div>
+          <h1 class="display-6 fw-bold mb-3">Heureux de vous revoir</h1>
+          <p class="text-muted mb-4">
+            Aujourd'hui est un nouveau départ. Connectez-vous pour reprendre la gestion
+            de vos projets immobiliers.
+          </p>
+          <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="login-email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control form-control-lg"
+                id="login-email"
+                name="email"
+                placeholder="exemple@email.com"
+                required
+              />
+            </div>
+            <div class="mb-2">
+              <label for="login-password" class="form-label">Mot de passe</label>
+              <input
+                type="password"
+                class="form-control form-control-lg"
+                id="login-password"
+                name="password"
+                placeholder="Au moins 8 caractères"
+                minlength="8"
+                required
+              />
+            </div>
+            <div class="d-flex justify-content-end mb-4">
+              <a href="#" class="link-primary fw-semibold text-decoration-none">Mot de passe oublié ?</a>
+            </div>
+            <button type="submit" class="btn btn-dark btn-lg w-100 mb-3">
+              Se connecter
+            </button>
+          </form>
+          <p class="text-muted">
+            Pas encore de compte ?
+            <a href="{% url 'accounts:register' %}" class="link-primary fw-semibold text-decoration-none">Créer un compte</a>
+          </p>
+        </div>
+        <div class="col-lg-6 d-flex flex-column p-5 order-first order-lg-last">
+          <div class="auth-visual flex-grow-1 rounded-4 overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1100&q=80"
+              alt="Illustration florale"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

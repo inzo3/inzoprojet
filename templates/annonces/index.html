@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Trouvez votre maison de rêve{% endblock %}
+
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6 text-lg-start text-center">
+        <span class="badge bg-success-subtle text-success fs-6 mb-3">Nouveau • Paiement sécurisé Mobile Money</span>
+        <h1 class="display-5 fw-bold mb-3">
+          Trouvez votre maison de rêve en quelques clics
+        </h1>
+        <p class="lead mb-4">
+          Des milliers d'annonces vérifiées. Localisation précise. Paiement
+          sécurisé. Faites confiance à LocaHome pour votre prochain logement.
+        </p>
+        <div class="d-flex flex-wrap gap-3 justify-content-lg-start justify-content-center">
+          <a href="{% url 'annonces:recherche' %}" class="btn btn-primary btn-lg rounded-pill px-4">
+            Commencer ma recherche
+          </a>
+          <a href="#" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            Publier une annonce
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="p-4 hero-card">
+          <h5 class="fw-semibold mb-3">Recherchez un logement disponible</h5>
+          <form method="get" action="{% url 'annonces:recherche' %}" class="row g-3">
+            <div class="col-12">
+              <label for="city" class="form-label">Ville ou quartier</label>
+              <input
+                type="text"
+                class="form-control"
+                id="city"
+                name="ville"
+                placeholder="Pointe-Noire, Brazzaville, ..."
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="type" class="form-label">Type de bien</label>
+              <select id="type" name="type" class="form-select">
+                <option value="">Tous</option>
+                <option value="appartement">Appartement</option>
+                <option value="maison">Maison</option>
+                <option value="studio">Studio</option>
+                <option value="villa">Villa</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="rooms" class="form-label">Nombre de chambres</label>
+              <select id="rooms" name="chambres" class="form-select">
+                <option value="">Tous</option>
+                <option value="1">1 chambre</option>
+                <option value="2">2 chambres</option>
+                <option value="3">3 chambres</option>
+                <option value="4">4+ chambres</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="price" class="form-label">Fourchette de prix (FCFA)</label>
+              <select id="price" name="prix_max" class="form-select">
+                <option value="" selected>Choisir un budget</option>
+                <option value="50000">50 000 FCFA</option>
+                <option value="75000">75 000 FCFA</option>
+                <option value="100000">100 000 FCFA</option>
+                <option value="125000">125 000 FCFA</option>
+                <option value="150000">150 000 FCFA</option>
+                <option value="200000">200 000 FCFA</option>
+                <option value="250000">250 000 FCFA</option>
+                <option value="300000">300 000 FCFA+</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary w-100 btn-lg">
+                Rechercher
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Comment ça marche ?</h2>
+      <p class="text-muted">
+        Un processus simple et transparent pour trouver votre prochain logement.
+      </p>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="col">
+        <div class="card card-hover h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon mb-3">
+            <i class="bi bi-search"></i>
+          </div>
+          <h5 class="fw-semibold">Recherchez votre maison idéale</h5>
+          <p class="text-muted">
+            Filtrez par ville, type de bien, budget et équipements pour trouver
+            l'annonce parfaite.
+          </p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card card-hover h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon mb-3 bg-warning-subtle text-warning">
+            <i class="bi bi-credit-card"></i>
+          </div>
+          <h5 class="fw-semibold">Déverrouillez les contacts</h5>
+          <p class="text-muted">
+            Accédez aux coordonnées et à l'adresse exacte pour seulement 1000 FCFA.
+          </p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card card-hover h-100 border-0 shadow-sm p-4 text-center">
+          <div class="feature-icon mb-3 bg-success-subtle text-success">
+            <i class="bi bi-telephone-outbound"></i>
+          </div>
+          <h5 class="fw-semibold">Contactez le propriétaire</h5>
+          <p class="text-muted">
+            Planifiez vos visites en direct et finalisez votre location en toute confiance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if annonces_featured %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+      <div>
+        <h2 class="fw-bold">Annonces à la une</h2>
+        <p class="text-muted mb-0">Des biens premium sélectionnés pour vous.</p>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      {% for annonce in annonces_featured %}
+      <div class="col">
+        <div class="card announcement-card border-0 shadow-sm card-hover">
+          {% if annonce.is_premium %}
+          <span class="premium-badge">Premium</span>
+          {% endif %}
+          {% if annonce.images.first %}
+          <img
+            src="{{ annonce.images.first.image.url }}"
+            class="card-img-top"
+            alt="{{ annonce.titre }}"
+          />
+          {% else %}
+          <img
+            src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?auto=format&fit=crop&w=800&q=80"
+            class="card-img-top"
+            alt="{{ annonce.titre }}"
+          />
+          {% endif %}
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-primary-subtle text-primary">{{ annonce.prix }} FCFA / mois</span>
+              <button class="btn btn-sm btn-light rounded-circle">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <h5 class="card-title">{{ annonce.titre }}</h5>
+            <p class="text-muted mb-3">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }}
+            </p>
+            <div class="d-flex gap-3 text-muted small">
+              <span><i class="bi bi-house-door"></i> {{ annonce.nombre_chambres }} ch</span>
+              <span><i class="bi bi-droplet"></i> {{ annonce.nombre_salles_bain }} sdb</span>
+              <span><i class="bi bi-aspect-ratio"></i> {{ annonce.superficie }} m²</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0">
+            <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary w-100">Voir détails</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if annonces_maisons %}
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Maisons à louer</h2>
+        <p class="text-muted mb-0">Des résidences spacieuses et familiales sélectionnées pour vous.</p>
+      </div>
+      <a href="{% url 'annonces:recherche' %}?type=maison" class="btn btn-outline-primary rounded-pill">
+        Voir toutes les maisons
+      </a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for annonce in annonces_maisons %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100">
+          <div class="position-relative">
+            {% if annonce.images.first %}
+            <img
+              src="{{ annonce.images.first.image.url }}"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% else %}
+            <img
+              src="https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=800&q=80"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+          </div>
+          <div class="card-body">
+            <span class="badge bg-primary-subtle text-primary mb-2">Maison</span>
+            <h5 class="card-title mb-2">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-4">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }} • {{ annonce.nombre_chambres }} ch • {{ annonce.nombre_salles_bain }} sdb
+            </p>
+            <div class="d-grid">
+              <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if annonces_meubles %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Biens meublés</h2>
+        <p class="text-muted mb-0">Des espaces clés en main, parfaits pour les séjours courts ou professionnels.</p>
+      </div>
+      <a href="{% url 'annonces:recherche' %}" class="btn btn-outline-primary rounded-pill">Voir les meublés</a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for annonce in annonces_meubles %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
+          <div class="position-relative">
+            {% if annonce.images.first %}
+            <img
+              src="{{ annonce.images.first.image.url }}"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% else %}
+            <img
+              src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+          </div>
+          <div class="card-body">
+            <span class="badge bg-success-subtle text-success mb-2">Meublé</span>
+            <h5 class="card-title mb-2 lh-card-title">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-4 lh-card-meta">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }} • {{ annonce.nombre_chambres }} ch • {{ annonce.nombre_salles_bain }} sdb
+            </p>
+            <div class="d-grid lh-card-actions">
+              <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if annonces_studios %}
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Studios pratiques</h2>
+        <p class="text-muted mb-0">Des espaces optimisés pour étudiants et jeunes actifs.</p>
+      </div>
+      <a href="{% url 'annonces:recherche' %}?type=studio" class="btn btn-outline-primary rounded-pill">Voir les studios</a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for annonce in annonces_studios %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
+          <div class="position-relative">
+            {% if annonce.images.first %}
+            <img
+              src="{{ annonce.images.first.image.url }}"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% else %}
+            <img
+              src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+          </div>
+          <div class="card-body">
+            <span class="badge bg-warning-subtle text-warning mb-2">Studio</span>
+            <h5 class="card-title mb-2 lh-card-title">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-4 lh-card-meta">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }} • 1 pièce
+            </p>
+            <div class="d-grid lh-card-actions">
+              <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if annonces_appartements %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Appartements modernes</h2>
+        <p class="text-muted mb-0">Des appartements contemporains dans les quartiers recherchés.</p>
+      </div>
+      <a href="{% url 'annonces:recherche' %}?type=appartement" class="btn btn-outline-primary rounded-pill">Voir les appartements</a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for annonce in annonces_appartements %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
+          <div class="position-relative">
+            {% if annonce.images.first %}
+            <img
+              src="{{ annonce.images.first.image.url }}"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% else %}
+            <img
+              src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80"
+              class="card-img-top property-thumb"
+              alt="{{ annonce.titre }}"
+            />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+          </div>
+          <div class="card-body">
+            <span class="badge bg-primary-subtle text-primary mb-2">Appartement</span>
+            <h5 class="card-title mb-2 lh-card-title">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-4 lh-card-meta">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }} • {{ annonce.nombre_chambres }} ch • {{ annonce.nombre_salles_bain }} sdb
+            </p>
+            <div class="d-grid lh-card-actions">
+              <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <h2 class="fw-bold">Pourquoi nous choisir</h2>
+        <p class="text-muted">
+          Une expérience fluide, sécurisée et transparente pour locataires et propriétaires.
+        </p>
+      </div>
+      <div class="col-lg-9">
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+          <div class="col">
+            <div class="card why-card why-card-1 shadow-lg p-4 h-100">
+              <div class="d-flex align-items-center gap-3">
+                <span class="feature-icon feature-icon-sm bg-success-subtle text-success">
+                  <i class="bi bi-shield-check"></i>
+                </span>
+                <div>
+                  <h5 class="fw-semibold">Annonces vérifiées</h5>
+                  <p class="text-muted mb-0">
+                    Des contrôles rigoureux pour garantir des annonces fiables et authentiques.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card why-card why-card-2 shadow-lg p-4 h-100">
+              <div class="d-flex align-items-center gap-3">
+                <span class="feature-icon feature-icon-sm bg-warning-subtle text-warning">
+                  <i class="bi bi-cash-stack"></i>
+                </span>
+                <div>
+                  <h5 class="fw-semibold">Prix transparents</h5>
+                  <p class="text-muted mb-0">
+                    Aucun frais caché, seuls les contacts déverrouillés sont facturés.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card why-card why-card-3 shadow-lg p-4 h-100">
+              <div class="d-flex align-items-center gap-3">
+                <span class="feature-icon feature-icon-sm">
+                  <i class="bi bi-geo-alt"></i>
+                </span>
+                <div>
+                  <h5 class="fw-semibold">Localisation précise</h5>
+                  <p class="text-muted mb-0">
+                    Visualisez facilement les biens sur Google Maps avec itinéraires.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card why-card why-card-4 shadow-lg p-4 h-100">
+              <div class="d-flex align-items-center gap-3">
+                <span class="feature-icon feature-icon-sm bg-dark text-white">
+                  <i class="bi bi-lock-fill"></i>
+                </span>
+                <div>
+                  <h5 class="fw-semibold">Paiement sécurisé</h5>
+                  <p class="text-muted mb-0">
+                    Mobile Money via MTN, Airtel et garantie de remboursement sous conditions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

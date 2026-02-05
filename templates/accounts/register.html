@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Inscription{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="auth-body">
+  <div class="auth-wrapper container-fluid py-5">
+    <div class="auth-card container register-card">
+      <div class="row g-0">
+        <div class="col-lg-6 d-flex flex-column p-5 order-lg-first order-last">
+          <div class="auth-visual flex-grow-1 rounded-4 overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1100&q=80"
+              alt="Intérieur design moderne"
+            />
+          </div>
+        </div>
+        <div class="col-lg-6 p-5">
+          <div class="mb-3">
+            <span class="badge rounded-pill bg-success-subtle text-success fw-semibold">Nouveau membre</span>
+          </div>
+          <h1 class="fw-bold mb-3">Créez votre compte LocaHome</h1>
+          <p class="text-muted mb-4">
+            Rejoignez la communauté pour publier vos biens, suivre vos opportunités et
+            contacter directement les propriétaires.
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-4 role-selector">
+              <label class="form-label">Type de compte</label>
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="register-role"
+                    id="role-owner"
+                    value="proprietaire"
+                    required
+                  />
+                  <label class="role-option w-100" for="role-owner">
+                    <span class="role-title">Propriétaire</span>
+                    <span class="role-caption">Publiez vos annonces et gérez vos biens en ligne.</span>
+                  </label>
+                </div>
+                <div class="col-sm-6">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="register-role"
+                    id="role-tenant"
+                    value="locataire"
+                    required
+                  />
+                  <label class="role-option w-100" for="role-tenant">
+                    <span class="role-title">Locataire</span>
+                    <span class="role-caption">Trouvez rapidement un logement vérifié près de vous.</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="register-firstname" class="form-label">Prénom</label>
+                <input
+                  type="text"
+                  class="form-control form-control-lg"
+                  id="register-firstname"
+                  name="register-firstname"
+                  placeholder="Jean"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="register-lastname" class="form-label">Nom</label>
+                <input
+                  type="text"
+                  class="form-control form-control-lg"
+                  id="register-lastname"
+                  name="register-lastname"
+                  placeholder="Dupont"
+                  required
+                />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="register-email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control form-control-lg"
+                id="register-email"
+                name="register-email"
+                placeholder="exemple@email.com"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="register-password" class="form-label">Mot de passe</label>
+              <input
+                type="password"
+                class="form-control form-control-lg"
+                id="register-password"
+                name="register-password"
+                placeholder="Au moins 8 caractères"
+                minlength="8"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              S'inscrire
+            </button>
+          </form>
+          <p class="text-muted mt-4">
+            Déjà inscrit ?
+            <a href="{% url 'accounts:login' %}" class="link-primary fw-semibold text-decoration-none">Revenir à la connexion</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
