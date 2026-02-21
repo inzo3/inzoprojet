@@ -83,7 +83,7 @@ AUTH_USER_MODEL = 'accounts.User'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ben_db',
+        'NAME': 'nzo_db',
         'USER': 'root',  # ou votre utilisateur MySQL
         'PASSWORD': '',
         'HOST': 'localhost',
