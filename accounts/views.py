@@ -78,13 +78,22 @@ def profil_proprietaire_view(request):
     proprietaire = getattr(request.user, 'proprietaire', None)
     annonces_actives = 0
     total_vues = 0
+    messages_recus = []
+    nombre_messages = 0
     if proprietaire:
         annonces_actives = proprietaire.annonces.filter(statut='active').count()
         total_vues = sum(annonce.nombre_vues for annonce in proprietaire.annonces.all())
+    from messagerie.models import Message
+    messages_recus = Message.objects.filter(destinataire=request.user).select_related(
+        'expediteur', 'annonce'
+    ).order_by('-date_envoi')[:15]
+    nombre_messages = Message.objects.filter(destinataire=request.user).count()
     return render(request, 'accounts/profil_proprietaire.html', {
         'proprietaire': proprietaire,
         'annonces_actives': annonces_actives,
         'total_vues': total_vues,
+        'messages_recus': messages_recus,
+        'nombre_messages': nombre_messages,
     })
 
 

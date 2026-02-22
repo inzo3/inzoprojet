@@ -265,12 +265,12 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center gap-3 mb-4">
                 {% if annonce.proprietaire.user.avatar %}
-                <img src="{{ annonce.proprietaire.user.avatar.url }}" alt="Propriétaire" class="rounded-circle contact-mask" width="64" height="64" />
+                <img src="{{ annonce.proprietaire.user.avatar.url }}" alt="Propriétaire" class="rounded-circle {% if not contact_debloque %}contact-mask{% endif %}" width="64" height="64" />
                 {% else %}
-                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="Propriétaire" class="rounded-circle contact-mask" width="64" height="64" />
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80" alt="Propriétaire" class="rounded-circle {% if not contact_debloque %}contact-mask{% endif %}" width="64" height="64" />
                 {% endif %}
                 <div>
-                  <h6 class="fw-semibold mb-1 contact-mask">{{ annonce.proprietaire.user.get_full_name|default:annonce.proprietaire.user.username }} (Propriétaire)</h6>
+                  <h6 class="fw-semibold mb-1 {% if not contact_debloque %}contact-mask{% endif %}">{{ annonce.proprietaire.user.get_full_name|default:annonce.proprietaire.user.username }} (Propriétaire)</h6>
                   <div class="d-flex align-items-center gap-2 text-warning">
                     <span class="fw-semibold text-dark">{{ annonce.proprietaire.rating|default:"0.0" }}</span>
                     <div>
@@ -294,16 +294,33 @@
               <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <span class="text-muted">Téléphone</span>
+                  {% if contact_debloque %}
+                  <span class="fw-semibold">{{ annonce.proprietaire.user.phone|default:"—" }}</span>
+                  {% else %}
                   <span class="fw-semibold contact-mask">06 *** ** **</span>
+                  {% endif %}
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                   <span class="text-muted">Email</span>
+                  {% if contact_debloque %}
+                  <span class="fw-semibold">{{ annonce.proprietaire.user.email }}</span>
+                  {% else %}
                   <span class="fw-semibold contact-mask">contact@******.com</span>
+                  {% endif %}
                 </div>
               </div>
+              {% if contact_debloque %}
+              <div class="alert alert-success py-2 mb-3 small">
+                <i class="bi bi-check-circle me-2"></i> Contact débloqué
+                {% if contact_debloque_expiration %}
+                <div class="mt-2 fw-semibold" id="contact-countdown-label">Visible encore : <span id="contact-countdown">--:--:--</span></div>
+                {% endif %}
+              </div>
+              {% else %}
               <a href="{% url 'paiements:paiement' annonce_id=annonce.pk %}" class="btn btn-primary w-100 btn-lg rounded-pill mb-3">
                 <i class="bi bi-credit-card me-2"></i> Débloquer le contact - 1000 FCFA
               </a>
+              {% endif %}
               <div class="d-grid gap-2 mb-4">
                 <a href="{% url 'messagerie:envoyer_message' annonce_id=annonce.pk %}" class="btn btn-outline-primary rounded-pill">
                   <i class="bi bi-chat-dots me-2"></i> Envoyer un message
@@ -320,14 +337,6 @@
                   {% endif %}
                 {% endif %}
               </div>
-              <div class="p-3 bg-light rounded-3">
-                <h6 class="fw-semibold mb-2">Avantages du déblocage</h6>
-                <ul class="list-unstyled d-grid gap-2 mb-0 small">
-                  <li><i class="bi bi-check-circle text-success me-2"></i> Numéro complet & adresse exacte</li>
-                  <li><i class="bi bi-check-circle text-success me-2"></i> Messagerie directe illimitée</li>
-                  <li><i class="bi bi-check-circle text-success me-2"></i> Bonus 3 déblocages supplémentaires</li>
-                </ul>
-              </div>
             </div>
           </div>
         </div>
@@ -342,5 +351,32 @@
   function changeMainImage(src) {
     document.getElementById('mainImage').src = src;
   }
+
+  {% if contact_debloque_expiration %}
+  (function() {
+    var end = new Date({{ contact_debloque_expiration|date:"U" }} * 1000);
+
+    function updateCountdown() {
+      var now = new Date();
+      if (now >= end) {
+        document.getElementById('contact-countdown').textContent = '0h 0min 0s';
+        if (document.getElementById('contact-countdown-label'))
+          document.getElementById('contact-countdown-label').innerHTML = '<i class="bi bi-clock-history me-1"></i> Accès expiré. <a href="">Actualiser</a>';
+        window.location.reload();
+        return;
+      }
+      var d = end - now;
+      var h = Math.floor(d / 3600000);
+      var m = Math.floor((d % 3600000) / 60000);
+      var s = Math.floor((d % 60000) / 1000);
+      document.getElementById('contact-countdown').textContent =
+        (h < 10 ? '0' : '') + h + 'h ' +
+        (m < 10 ? '0' : '') + m + 'min ' +
+        (s < 10 ? '0' : '') + s + 's';
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  })();
+  {% endif %}
 </script>
 {% endblock %}

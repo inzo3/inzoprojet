@@ -44,7 +44,14 @@ def index_view(request):
 
 def annonce_detail_view(request, pk):
     """Vue de détail d'une annonce"""
-    annonce = get_object_or_404(Annonce, pk=pk, statut='active')
+    annonce = get_object_or_404(Annonce, pk=pk)
+
+    # Annonces en attente/désactivées : visible uniquement par le propriétaire
+    if annonce.statut != 'active':
+        from django.http import Http404
+        proprietaire = getattr(request.user, 'proprietaire', None)
+        if not (request.user.is_authenticated and proprietaire and annonce.proprietaire_id == proprietaire.pk):
+            raise Http404("Annonce non disponible")
     
     # Incrémenter le nombre de vues
     annonce.nombre_vues += 1
@@ -65,13 +72,36 @@ def annonce_detail_view(request, pk):
     if request.user.is_authenticated:
         from messagerie.models import Favori
         is_favori = Favori.objects.filter(user=request.user, annonce=annonce).exists()
-    
+
+    # Vérifier si le contact est débloqué pour cet utilisateur (photo et infos visibles)
+    from django.utils import timezone
+    from paiements.models import ContactDebloque
+    contact_debloque = False
+    contact_debloque_expiration = None
+    if request.user.is_authenticated:
+        cd = ContactDebloque.objects.filter(
+            user=request.user,
+            annonce=annonce,
+            est_actif=True,
+            date_expiration__gt=timezone.now(),
+        ).first()
+        if cd:
+            contact_debloque = True
+            contact_debloque_expiration = cd.date_expiration
+    # Le propriétaire voit toujours son propre contact en clair (pas de décompte)
+    if not contact_debloque and request.user.is_authenticated:
+        proprietaire = getattr(request.user, 'proprietaire', None)
+        if proprietaire and annonce.proprietaire_id == proprietaire.pk:
+            contact_debloque = True
+
     return render(request, 'annonces/annonce_detail.html', {
         'annonce': annonce,
         'images': images,
         'equipements': equipements,
         'annonces_similaires': annonces_similaires,
         'is_favori': is_favori,
+        'contact_debloque': contact_debloque,
+        'contact_debloque_expiration': contact_debloque_expiration,
     })
 
 

@@ -164,7 +164,7 @@
           </span>
           <div>
             <div class="text-muted">Leads</div>
-            <div class="fw-bold fs-4">0</div>
+            <div class="fw-bold fs-4">{{ nombre_messages|default:0 }}</div>
           </div>
         </div>
         <div class="text-muted small mt-3">Demandes et contacts reçus.</div>
@@ -187,42 +187,7 @@
   </section>
 
   <section class="row g-4">
-    <div class="col-lg-4">
-      <div class="card panel-card p-4 h-100">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div>
-            <h2 class="h5 fw-semibold mb-1">À propos</h2>
-            <div class="text-muted small">Informations publiques</div>
-          </div>
-          <button type="button" class="btn btn-sm btn-outline-primary rounded-pill">
-            <i class="bi bi-pencil-square me-1"></i>Modifier
-          </button>
-        </div>
-
-        <div class="d-grid gap-3">
-          <div class="p-3 bg-light rounded-4">
-            <div class="text-muted small">Téléphone</div>
-            <div class="fw-semibold">{{ user.phone|default:"Non renseigné" }}</div>
-          </div>
-          <div class="p-3 bg-light rounded-4">
-            <div class="text-muted small">Email</div>
-            <div class="fw-semibold">{{ user.email }}</div>
-          </div>
-          {% if proprietaire %}
-          <div class="p-3 bg-light rounded-4">
-            <div class="text-muted small">Zone principale</div>
-            <div class="fw-semibold">{{ proprietaire.zone_principale|default:"Non renseigné" }}</div>
-          </div>
-          <div class="p-3 bg-light rounded-4">
-            <div class="text-muted small">Temps de réponse</div>
-            <div class="fw-semibold">{{ proprietaire.temps_reponse|default:"Non renseigné" }}</div>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-8">
+    <div class="col-12">
       <div class="card panel-card p-4 mb-4">
         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
           <div>
@@ -294,6 +259,44 @@
           <a href="#" class="btn btn-primary rounded-pill">
             <i class="bi bi-plus-circle me-2"></i>Créer votre première annonce
           </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="card panel-card p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div>
+            <h2 class="h5 fw-semibold mb-1">Messages reçus</h2>
+            <div class="text-muted small">Demandes des locataires sur vos annonces</div>
+          </div>
+        </div>
+
+        {% if messages_recus %}
+        <div class="list-group list-group-flush">
+          {% for msg in messages_recus %}
+          <div class="list-group-item px-0 py-3 {% if not msg.lu %}bg-light bg-opacity-50{% endif %} border-0 border-bottom">
+            <div class="d-flex gap-3">
+              <div class="flex-grow-1 min-w-0">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                  <h6 class="fw-semibold mb-0">
+                    {{ msg.expediteur.get_full_name|default:msg.expediteur.username }}
+                    {% if not msg.lu %}<span class="badge bg-primary ms-2 pill">Nouveau</span>{% endif %}
+                  </h6>
+                  <span class="text-muted small">{{ msg.date_envoi|timesince }}</span>
+                </div>
+                <div class="fw-medium text-muted small mb-1">
+                  {{ msg.sujet|default:"Sans sujet" }}{% if msg.annonce %} • {{ msg.annonce.titre }}{% endif %}
+                </div>
+                <p class="mb-0 text-muted small">{{ msg.contenu|truncatewords:20 }}</p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-chat-dots fs-1 text-muted"></i>
+          <p class="text-muted mt-3 mb-0">Aucun message pour le moment.</p>
         </div>
         {% endif %}
       </div>

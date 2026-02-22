@@ -10,7 +10,6 @@ class Paiement(models.Model):
     METHODE_CHOICES = [
         ('mtn', 'MTN Money'),
         ('airtel', 'Airtel Money'),
-        ('fedapay', 'FedaPay'),
     ]
     
     STATUT_CHOICES = [
