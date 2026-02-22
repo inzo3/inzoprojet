@@ -313,7 +313,7 @@
               <div class="alert alert-success py-2 mb-3 small">
                 <i class="bi bi-check-circle me-2"></i> Contact débloqué
                 {% if contact_debloque_expiration %}
-                <div class="mt-2 fw-semibold" id="contact-countdown-label">Visible encore : <span id="contact-countdown">--:--:--</span></div>
+                <div class="mt-2 text-muted">Ce profil ne sera plus visible après 3 jours.</div>
                 {% endif %}
               </div>
               {% else %}
@@ -352,31 +352,5 @@
     document.getElementById('mainImage').src = src;
   }
 
-  {% if contact_debloque_expiration %}
-  (function() {
-    var end = new Date({{ contact_debloque_expiration|date:"U" }} * 1000);
-
-    function updateCountdown() {
-      var now = new Date();
-      if (now >= end) {
-        document.getElementById('contact-countdown').textContent = '0h 0min 0s';
-        if (document.getElementById('contact-countdown-label'))
-          document.getElementById('contact-countdown-label').innerHTML = '<i class="bi bi-clock-history me-1"></i> Accès expiré. <a href="">Actualiser</a>';
-        window.location.reload();
-        return;
-      }
-      var d = end - now;
-      var h = Math.floor(d / 3600000);
-      var m = Math.floor((d % 3600000) / 60000);
-      var s = Math.floor((d % 60000) / 1000);
-      document.getElementById('contact-countdown').textContent =
-        (h < 10 ? '0' : '') + h + 'h ' +
-        (m < 10 ? '0' : '') + m + 'min ' +
-        (s < 10 ? '0' : '') + s + 's';
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  })();
-  {% endif %}
 </script>
 {% endblock %}

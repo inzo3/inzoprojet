@@ -40,15 +40,15 @@ def paiement_view(request, annonce_id):
             statut='valide'  # En production, vérifier avec l'API de paiement
         )
         
-        # Créer le contact débloqué (valable 24 heures)
+        # Créer le contact débloqué (valable 3 jours)
         ContactDebloque.objects.create(
             user=request.user,
             annonce=annonce,
             paiement=paiement,
-            date_expiration=timezone.now() + timedelta(hours=24)
+            date_expiration=timezone.now() + timedelta(days=3)
         )
         
-        messages.success(request, 'Contact débloqué avec succès! Visible pendant 24 heures.')
+        messages.success(request, 'Contact débloqué avec succès!')
         return redirect('annonces:annonce_detail', pk=annonce_id)
     
     return render(request, 'paiements/paiement.html', {
