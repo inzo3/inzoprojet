@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Recherche d'annonces{% endblock %}
+
+{% block content %}
+<section class="bg-light py-4">
+  <div class="container">
+    <h1 class="fw-bold mb-4">Rechercher un logement</h1>
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+      <form method="get" action="{% url 'annonces:recherche' %}" class="row g-3">
+        <div class="col-12 col-md-6 col-lg-3">
+          <label for="q" class="form-label">Mots-clés</label>
+          <input type="text" class="form-control" id="q" name="q" value="{{ query }}" placeholder="Titre, description, quartier..." />
+        </div>
+        <div class="col-12 col-md-6 col-lg-2">
+          <label for="ville" class="form-label">Ville</label>
+          <input type="text" class="form-control" id="ville" name="ville" value="{{ ville }}" placeholder="Ville" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-2">
+          <label for="type" class="form-label">Type de bien</label>
+          <select id="type" name="type" class="form-select">
+            <option value="">Tous</option>
+            <option value="appartement" {% if type_bien == 'appartement' %}selected{% endif %}>Appartement</option>
+            <option value="maison" {% if type_bien == 'maison' %}selected{% endif %}>Maison</option>
+            <option value="studio" {% if type_bien == 'studio' %}selected{% endif %}>Studio</option>
+            <option value="villa" {% if type_bien == 'villa' %}selected{% endif %}>Villa</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-2">
+          <label for="prix_min" class="form-label">Prix min (FCFA)</label>
+          <input type="number" class="form-control" id="prix_min" name="prix_min" value="{{ request.GET.prix_min }}" placeholder="Min" min="0" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-2">
+          <label for="prix_max" class="form-label">Prix max (FCFA)</label>
+          <input type="number" class="form-control" id="prix_max" name="prix_max" value="{{ request.GET.prix_max }}" placeholder="Max" min="0" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-1">
+          <label for="chambres" class="form-label">Chambres</label>
+          <select id="chambres" name="chambres" class="form-select">
+            <option value="">Toutes</option>
+            <option value="1" {% if request.GET.chambres == '1' %}selected{% endif %}>1</option>
+            <option value="2" {% if request.GET.chambres == '2' %}selected{% endif %}>2</option>
+            <option value="3" {% if request.GET.chambres == '3' %}selected{% endif %}>3</option>
+            <option value="4" {% if request.GET.chambres == '4' %}selected{% endif %}>4+</option>
+          </select>
+        </div>
+        <div class="col-12 col-lg-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100 rounded-pill">
+            <i class="bi bi-search me-2"></i> Rechercher
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <p class="text-muted mb-4">
+      {% if annonces %}
+        <strong>{{ annonces.count }}</strong> annonce{{ annonces.count|pluralize }} trouvée{{ annonces.count|pluralize }}
+      {% else %}
+        Aucune annonce ne correspond à vos critères. Modifiez les filtres ou <a href="{% url 'annonces:recherche' %}">réinitialisez</a>.
+      {% endif %}
+    </p>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      {% for annonce in annonces %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100">
+          <div class="position-relative">
+            {% if annonce.images.first %}
+            <img src="{{ annonce.images.first.image.url }}" class="card-img-top property-thumb" alt="{{ annonce.titre }}" />
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80" class="card-img-top property-thumb" alt="{{ annonce.titre }}" />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+            {% if annonce.is_premium %}
+            <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark">Premium</span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <span class="badge bg-primary-subtle text-primary mb-2">{{ annonce.get_type_bien_display }}</span>
+            <h5 class="card-title mb-2">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-3">
+              <i class="bi bi-geo-alt"></i> {{ annonce.ville }}, {{ annonce.quartier }}
+            </p>
+            <div class="d-flex gap-3 text-muted small mb-3">
+              <span><i class="bi bi-door-open"></i> {{ annonce.nombre_chambres }} ch</span>
+              <span><i class="bi bi-droplet"></i> {{ annonce.nombre_salles_bain }} sdb</span>
+              <span><i class="bi bi-aspect-ratio"></i> {{ annonce.superficie }} m²</span>
+            </div>
+            <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary w-100">Voir détails</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="bi bi-search display-4 text-muted"></i>
+          <p class="lead text-muted mt-3">Aucune annonce pour le moment.</p>
+          <a href="{% url 'annonces:index' %}" class="btn btn-primary rounded-pill">Retour à l'accueil</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,6 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from .models import Annonce, ImageAnnonce
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Annonce, ImageAnnonce, Equipement, AnnonceEquipement
+from .forms import AnnonceForm
 
 
 def index_view(request):
@@ -105,4 +108,58 @@ def recherche_view(request):
         'query': query,
         'ville': ville,
         'type_bien': type_bien,
+    })
+
+
+@login_required
+def annonce_create_view(request):
+    """Vue pour publier une nouvelle annonce (réservée aux propriétaires)."""
+    proprietaire = getattr(request.user, 'proprietaire', None)
+    if not proprietaire:
+        messages.error(request, 'Seuls les propriétaires peuvent publier une annonce.')
+        return redirect('annonces:index')
+
+    if request.method == 'POST':
+        form = AnnonceForm(request.POST)
+        if form.is_valid():
+            annonce = form.save(commit=False)
+            annonce.proprietaire = proprietaire
+            annonce.statut = 'en_attente'
+            annonce.save()
+
+            # Images
+            images = request.FILES.getlist('images')
+            for i, img in enumerate(images):
+                if img:
+                    ImageAnnonce.objects.create(
+                        annonce=annonce,
+                        image=img,
+                        is_principale=(i == 0),
+                        ordre=i,
+                    )
+
+            # Équipements
+            equipement_ids = request.POST.getlist('equipements')
+            for eq_id in equipement_ids:
+                if eq_id:
+                    try:
+                        equipement = Equipement.objects.get(pk=eq_id)
+                        AnnonceEquipement.objects.get_or_create(
+                            annonce=annonce,
+                            equipement=equipement,
+                            defaults={'description': ''},
+                        )
+                    except Equipement.DoesNotExist:
+                        pass
+
+            messages.success(request, 'Votre annonce a été créée et est en attente de validation.')
+            return redirect('accounts:profil_proprietaire')
+    else:
+        form = AnnonceForm()
+
+    equipements = Equipement.objects.all().order_by('nom')
+    return render(request, 'annonces/annonce_form.html', {
+        'form': form,
+        'equipements': equipements,
+        'is_edit': False,
     })

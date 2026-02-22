@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • {% if is_edit %}Modifier l'annonce{% else %}Publier une annonce{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-primary text-white py-3">
+          <h4 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>
+            {% if is_edit %}Modifier l'annonce{% else %}Publier une annonce{% endif %}
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          <form method="post" action="{% url 'annonces:annonce_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <h6 class="fw-semibold text-muted mb-3">Informations générales</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label for="id_titre" class="form-label">Titre de l'annonce <span class="text-danger">*</span></label>
+                {{ form.titre }}
+                {% if form.titre.errors %}<div class="text-danger small">{{ form.titre.errors }}</div>{% endif %}
+              </div>
+              <div class="col-12">
+                <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_type_bien" class="form-label">Type de bien <span class="text-danger">*</span></label>
+                {{ form.type_bien }}
+                {% if form.type_bien.errors %}<div class="text-danger small">{{ form.type_bien.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_prix" class="form-label">Prix (FCFA / mois) <span class="text-danger">*</span></label>
+                {{ form.prix }}
+                {% if form.prix.errors %}<div class="text-danger small">{{ form.prix.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_superficie" class="form-label">Superficie (m²) <span class="text-danger">*</span></label>
+                {{ form.superficie }}
+                {% if form.superficie.errors %}<div class="text-danger small">{{ form.superficie.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_nombre_chambres" class="form-label">Nombre de chambres <span class="text-danger">*</span></label>
+                {{ form.nombre_chambres }}
+                {% if form.nombre_chambres.errors %}<div class="text-danger small">{{ form.nombre_chambres.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_nombre_salles_bain" class="form-label">Nombre de salles de bain <span class="text-danger">*</span></label>
+                {{ form.nombre_salles_bain }}
+                {% if form.nombre_salles_bain.errors %}<div class="text-danger small">{{ form.nombre_salles_bain.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4 d-flex align-items-end gap-3 pt-2">
+                <div class="form-check">
+                  {{ form.is_meuble }}
+                  <label class="form-check-label" for="id_is_meuble">Meublé</label>
+                </div>
+                <div class="form-check">
+                  {{ form.is_premium }}
+                  <label class="form-check-label" for="id_is_premium">Annonce premium</label>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-semibold text-muted mb-3">Localisation</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <label for="id_ville" class="form-label">Ville <span class="text-danger">*</span></label>
+                {{ form.ville }}
+                {% if form.ville.errors %}<div class="text-danger small">{{ form.ville.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label for="id_quartier" class="form-label">Quartier <span class="text-danger">*</span></label>
+                {{ form.quartier }}
+                {% if form.quartier.errors %}<div class="text-danger small">{{ form.quartier.errors }}</div>{% endif %}
+              </div>
+              <div class="col-12">
+                <label for="id_adresse" class="form-label">Adresse détaillée <span class="text-danger">*</span></label>
+                {{ form.adresse }}
+                {% if form.adresse.errors %}<div class="text-danger small">{{ form.adresse.errors }}</div>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label for="id_latitude" class="form-label">Latitude (optionnel)</label>
+                {{ form.latitude }}
+              </div>
+              <div class="col-md-6">
+                <label for="id_longitude" class="form-label">Longitude (optionnel)</label>
+                {{ form.longitude }}
+              </div>
+            </div>
+
+            <h6 class="fw-semibold text-muted mb-3">Photos</h6>
+            <div class="mb-4">
+              <input type="file" name="images" class="form-control" accept="image/*" multiple />
+              <small class="text-muted">Plusieurs fichiers possibles. La première image sera la photo principale.</small>
+            </div>
+
+            {% if equipements %}
+            <h6 class="fw-semibold text-muted mb-3">Équipements</h6>
+            <div class="mb-4">
+              <div class="row row-cols-2 row-cols-md-3 g-2">
+                {% for eq in equipements %}
+                <div class="col">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="equipements" value="{{ eq.pk }}" id="eq_{{ eq.pk }}" />
+                    <label class="form-check-label" for="eq_{{ eq.pk }}">{{ eq.nom }}</label>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+              <a href="{% url 'annonces:index' %}" class="btn btn-outline-secondary rounded-pill">Annuler</a>
+              <button type="submit" class="btn btn-primary rounded-pill">
+                <i class="bi bi-check-lg me-2"></i> {% if is_edit %}Enregistrer{% else %}Publier l'annonce{% endif %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

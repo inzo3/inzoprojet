@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -18,14 +19,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+# En production : définir DJANGO_SECRET_KEY, DJANGO_DEBUG=False, ALLOWED_HOSTS dans l'environnement.
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%y#r6x&zj3v#@gt18t(e*jgv*-e7rep3(g7e-6j40f@)u@pq4f'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-%y#r6x&zj3v#@gt18t(e*jgv*-e7rep3(g7e-6j40f@)u@pq4f'
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if h.strip()
+]
 
 
 # Application definition
@@ -76,6 +82,8 @@ WSGI_APPLICATION = 'nzo.wsgi.application'
 
 # Modèle utilisateur personnalisé
 AUTH_USER_MODEL = 'accounts.User'
+LOGIN_URL = '/compte/login/'
+LOGIN_REDIRECT_URL = '/'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

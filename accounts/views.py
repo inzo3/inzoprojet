@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect # type: ignore
-from django.contrib.auth import login, authenticate # type: ignore
-from django.contrib.auth.decorators import login_required # type: ignore
-from django.contrib import messages # type: ignore
+from django.shortcuts import render, redirect  # type: ignore
+from django.contrib.auth import login, authenticate, logout  # type: ignore
+from django.contrib.auth.decorators import login_required  # type: ignore
+from django.contrib import messages  # type: ignore
 from .models import User, Proprietaire, Locataire
 
 
@@ -86,3 +86,10 @@ def profil_proprietaire_view(request):
         'annonces_actives': annonces_actives,
         'total_vues': total_vues,
     })
+
+
+def logout_view(request):
+    """Vue de déconnexion"""
+    logout(request)
+    messages.success(request, 'Vous avez été déconnecté.')
+    return redirect('annonces:index')

@@ -1,0 +1,4 @@
+# LocaHome / nzo - Dépendances Python
+Django>=6.0,<7
+mysqlclient>=2.2,<3
+Pillow>=10.0,<11
