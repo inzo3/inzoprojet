@@ -2,3 +2,5 @@
 Django>=6.0,<7
 mysqlclient>=2.2,<3
 Pillow>=10.0,<11
+django-allauth>=65.22,<66
+python-dotenv>=1.2,<2

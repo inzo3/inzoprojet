@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from annonces.models import Annonce
 from .models import Message, Favori
 
 
 @login_required
+@require_POST
 def ajouter_favori(request, annonce_id):
     """Ajouter une annonce aux favoris"""
     annonce = get_object_or_404(Annonce, pk=annonce_id)
@@ -21,6 +23,7 @@ def ajouter_favori(request, annonce_id):
 
 
 @login_required
+@require_POST
 def retirer_favori(request, annonce_id):
     """Retirer une annonce des favoris"""
     annonce = get_object_or_404(Annonce, pk=annonce_id)

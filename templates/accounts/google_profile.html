@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LocaHome • Finaliser votre profil{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="auth-body">
+  <div class="auth-wrapper container-fluid py-5">
+    <div class="auth-card container" style="max-width: 680px;">
+      <div class="p-5">
+        <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold mb-3">Une dernière étape</span>
+        <h1 class="h2 fw-bold mb-3">Quel type de compte souhaitez-vous créer ?</h1>
+        <p class="text-muted mb-4">Votre compte Google est connecté. Choisissez un rôle pour finaliser votre profil.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-grid gap-3">
+            <button type="submit" name="role" value="locataire" class="btn btn-primary btn-lg">
+              Continuer comme locataire
+            </button>
+            <button type="submit" name="role" value="proprietaire" class="btn btn-outline-secondary btn-lg">
+              Continuer comme propriétaire
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

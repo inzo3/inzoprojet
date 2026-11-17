@@ -327,13 +327,19 @@
                 </a>
                 {% if user.is_authenticated %}
                   {% if is_favori %}
-                  <a href="{% url 'messagerie:retirer_favori' annonce_id=annonce.pk %}" class="btn btn-outline-secondary rounded-pill">
-                    <i class="bi bi-heart-fill me-2"></i> Retirer des favoris
-                  </a>
+                  <form method="post" action="{% url 'messagerie:retirer_favori' annonce_id=annonce.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary rounded-pill">
+                      <i class="bi bi-heart-fill me-2"></i> Retirer des favoris
+                    </button>
+                  </form>
                   {% else %}
-                  <a href="{% url 'messagerie:ajouter_favori' annonce_id=annonce.pk %}" class="btn btn-outline-secondary rounded-pill">
-                    <i class="bi bi-heart me-2"></i> Ajouter aux favoris
-                  </a>
+                  <form method="post" action="{% url 'messagerie:ajouter_favori' annonce_id=annonce.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary rounded-pill">
+                      <i class="bi bi-heart me-2"></i> Ajouter aux favoris
+                    </button>
+                  </form>
                   {% endif %}
                 {% endif %}
               </div>
