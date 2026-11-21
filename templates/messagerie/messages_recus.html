@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}LocaHome • Messages reçus{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+      <h1 class="h2 fw-bold mb-1">Messages reçus</h1>
+      <p class="text-body-secondary mb-0">Les demandes envoyées au sujet de vos annonces.</p>
+    </div>
+    <span class="badge rounded-pill text-bg-primary fs-6">{{ unread_count }} non lu{{ unread_count|pluralize:"s" }}</span>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    {% if page_obj.object_list %}
+    <div class="list-group list-group-flush rounded-4">
+      {% for msg in page_obj %}
+      <a href="{% url 'messagerie:detail_message' pk=msg.pk %}"
+         class="list-group-item list-group-item-action p-3 p-md-4 {% if not msg.lu %}bg-primary-subtle{% endif %}">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div class="min-w-0">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <h2 class="h6 fw-semibold mb-0">{{ msg.expediteur.get_full_name|default:msg.expediteur.username }}</h2>
+              {% if not msg.lu %}<span class="badge text-bg-primary">Nouveau</span>{% endif %}
+            </div>
+            <div class="fw-medium">{{ msg.sujet|default:"Sans sujet" }}</div>
+            {% if msg.annonce %}<div class="small text-body-secondary mt-1"><i class="bi bi-house me-1"></i>{{ msg.annonce.titre }}</div>{% else %}<div class="small text-body-secondary mt-1">Annonce supprimée</div>{% endif %}
+            <p class="small text-body-secondary mb-0 mt-2">{{ msg.contenu|truncatewords:24 }}</p>
+          </div>
+          <time class="small text-body-secondary text-nowrap" datetime="{{ msg.date_envoi|date:'c' }}">{{ msg.date_envoi|timesince }}</time>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="p-3" aria-label="Pagination des messages">
+      <ul class="pagination justify-content-center mb-0">
+        {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>{% else %}<li class="page-item disabled"><span class="page-link">Précédent</span></li>{% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>{% else %}<li class="page-item disabled"><span class="page-link">Suivant</span></li>{% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="text-center p-5">
+      <i class="bi bi-inbox display-4 text-body-secondary" aria-hidden="true"></i>
+      <h2 class="h5 mt-3">Votre boîte de réception est vide</h2>
+      <p class="text-body-secondary mb-0">Les demandes liées à vos annonces apparaîtront ici.</p>
+    </div>
+    {% endif %}
+  </div>
+  <div class="mt-3"><a class="btn btn-outline-secondary rounded-pill" href="{% url 'accounts:profil_proprietaire' %}"><i class="bi bi-arrow-left me-2"></i>Retour au tableau de bord</a></div>
+</div>
+{% endblock %}

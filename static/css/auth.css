@@ -174,6 +174,66 @@ body {
   margin-top: 4px;
 }
 
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-option {
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-option .role-title {
+  color: var(--bs-body-color);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-option .role-caption {
+  color: var(--bs-secondary-color);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-selector .btn-check:checked + .role-option {
+  box-shadow: 0 0 0 0.2rem rgba(148, 163, 184, 0.18);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] #role-owner:checked + .role-option {
+  background-color: #dbeafe;
+  border-color: #60a5fa;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] #role-tenant:checked + .role-option {
+  background-color: #d1fae5;
+  border-color: #34d399;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-selector .btn-check:checked + .role-option .role-title {
+  color: #0f172a;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .role-selector .btn-check:checked + .role-option .role-caption {
+  color: #334155;
+}
+
+html[data-auth-theme="dark"] #role-owner:checked + .role-option {
+  color: #0f172a;
+  background-color: #dbeafe;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
+}
+
+html[data-auth-theme="dark"] #role-tenant:checked + .role-option {
+  color: #0f172a;
+  background-color: #d1fae5;
+  border-color: #34d399;
+  box-shadow: 0 0 0 0.2rem rgba(52, 211, 153, 0.2);
+}
+
+html[data-auth-theme="dark"] #role-owner:checked + .role-option .role-title,
+html[data-auth-theme="dark"] #role-tenant:checked + .role-option .role-title {
+  color: #0f172a;
+}
+
+html[data-auth-theme="dark"] #role-owner:checked + .role-option .role-caption,
+html[data-auth-theme="dark"] #role-tenant:checked + .role-option .role-caption {
+  color: #334155;
+}
+
 .register-card .btn-primary {
   border-radius: var(--auth-radius-md);
   padding: 14px 16px;

@@ -8,4 +8,5 @@ urlpatterns = [
     path('annonce/<int:pk>/', views.annonce_detail_view, name='annonce_detail'),
     path('recherche/', views.recherche_view, name='recherche'),
     path('creer/', views.annonce_create_view, name='annonce_create'),
+    path('annonce/<int:pk>/modifier/', views.annonce_edit_view, name='annonce_edit'),
 ]

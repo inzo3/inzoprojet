@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load l10n %}
 
 {% block title %}LocaHome • {{ annonce.titre }}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.css" />
 <style>
   .breadcrumb-item + .breadcrumb-item::before {
     color: var(--lh-primary);
@@ -23,7 +25,6 @@
 
   .gallery-thumbs img {
     border-radius: 12px;
-    cursor: pointer;
     height: 110px;
     object-fit: cover;
     width: 100%;
@@ -32,6 +33,18 @@
 
   .gallery-thumbs img:hover {
     transform: translateY(-4px);
+  }
+
+  .gallery-thumb-button {
+    display: block;
+    width: 100%;
+    border-radius: 12px;
+    background: transparent;
+  }
+
+  .gallery-thumb-button[aria-pressed="true"] img {
+    outline: 3px solid var(--lh-primary);
+    outline-offset: 2px;
   }
 
   .badge-premium {
@@ -46,18 +59,27 @@
     box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
   }
 
-  .blurred-map {
+  .map-panel {
     position: relative;
     overflow: hidden;
     border-radius: 16px;
+    min-height: 400px;
   }
 
-  .blurred-map::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(6px);
-    background-color: rgba(17, 24, 39, 0.35);
+  .listing-map {
+    height: 400px;
+    width: 100%;
+  }
+
+  .map-placeholder {
+    min-height: 400px;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.25), transparent 35%),
+      radial-gradient(circle at 80% 70%, rgba(20, 184, 166, 0.22), transparent 40%),
+      #e2e8f0;
+    color: #0f172a;
   }
 
   .listing-features span {
@@ -100,7 +122,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="bg-light py-3">
+<section class="bg-body-tertiary py-3">
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
@@ -122,7 +144,7 @@
           <span class="badge-premium">Premium</span>
           {% endif %}
           {% if images.first %}
-          <img src="{{ images.first.image.url }}" alt="Galerie principale" id="mainImage" />
+          <img src="{{ images.first.image.url }}" alt="Photo 1 du logement : {{ annonce.titre }}" id="mainImage" />
           {% else %}
           <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80" alt="Galerie principale" id="mainImage" />
           {% endif %}
@@ -131,28 +153,14 @@
           </div>
         </div>
         {% if images.count > 1 %}
-        <div class="row row-cols-2 row-cols-md-5 g-3 gallery-thumbs">
-          {% for image in images|slice:":5" %}
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3 gallery-thumbs" aria-label="Toutes les photos du logement">
+          {% for image in images %}
           <div class="col">
-            <img class="w-100 thumb-image" src="{{ image.image.url }}" alt="Miniature" onclick="changeMainImage('{{ image.image.url }}')" />
+            <button type="button" class="gallery-thumb-button p-0 border-0" data-gallery-index="{{ forloop.counter }}" data-gallery-src="{{ image.image.url }}" data-gallery-alt="Photo {{ forloop.counter }} du logement : {{ annonce.titre }}" aria-label="Afficher la photo {{ forloop.counter }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
+              <img class="w-100 thumb-image" src="{{ image.image.url }}" alt="Miniature {{ forloop.counter }}" />
+            </button>
           </div>
           {% endfor %}
-          {% if images.count > 5 %}
-          <div class="col">
-            <div class="position-relative overflow-hidden rounded-3" style="height: 110px;">
-              {% with images_list=images|slice:":6" %}
-                {% for img in images_list %}
-                  {% if forloop.counter == 6 %}
-                  <img class="w-100 h-100" src="{{ img.image.url }}" alt="Miniature" style="object-fit: cover;" />
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-              <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 text-white fw-semibold">
-                +{{ images.count|add:"-5" }} photos
-              </div>
-            </div>
-          </div>
-          {% endif %}
         </div>
         {% endif %}
 
@@ -185,7 +193,7 @@
           <div class="row row-cols-1 row-cols-md-2 g-3">
             {% for annonce_equipement in equipements %}
             <div class="col">
-              <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <div class="d-flex align-items-center gap-3 p-3 bg-body-tertiary rounded-3">
                 <span class="text-primary fs-4"><i class="bi bi-{{ annonce_equipement.equipement.icone|default:'check-circle' }}"></i></span>
                 <div>
                   <h6 class="mb-0">{{ annonce_equipement.equipement.nom }}</h6>
@@ -205,26 +213,35 @@
             <h4 class="fw-semibold mb-0">Localisation</h4>
             <span class="badge text-bg-warning text-dark">Localisation approximative (rayon 500 m)</span>
           </div>
-          <div class="blurred-map rounded-4 overflow-hidden">
-            {% if annonce.latitude and annonce.longitude %}
-            <iframe
-              width="100%"
-              height="400"
-              style="border:0"
-              loading="lazy"
-              allowfullscreen
-              src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q={{ annonce.latitude }},{{ annonce.longitude }}&zoom=15">
-            </iframe>
-            {% else %}
-            <img src="https://images.unsplash.com/photo-1502920917128-1aa500764b81?auto=format&fit=crop&w=1400&q=80" class="w-100" alt="Carte" />
-            {% endif %}
-            <div class="position-absolute top-50 start-50 translate-middle text-white text-center px-4" style="z-index: 10;">
-              <i class="bi bi-lock fs-1 mb-2 d-block"></i>
-              <p class="mb-3">Débloquez le contact pour afficher l'adresse exacte et la carte détaillée.</p>
-              <a href="{% url 'paiements:paiement' annonce_id=annonce.pk %}" class="btn btn-primary rounded-pill px-4">
-                Voir l'adresse exacte - 1000 FCFA
-              </a>
+          <div class="map-panel rounded-4 overflow-hidden">
+            {% if contact_debloque and annonce.latitude is not None and annonce.longitude is not None %}
+            <div
+              id="listing-map"
+              class="listing-map"
+              data-latitude="{{ annonce.latitude|unlocalize }}"
+              data-longitude="{{ annonce.longitude|unlocalize }}"
+              aria-label="Carte de localisation exacte">
             </div>
+            {% elif contact_debloque %}
+            <div class="map-placeholder text-center p-4">
+              <div>
+                <i class="bi bi-map fs-1 text-primary d-block mb-3"></i>
+                <p class="fw-semibold mb-1">La carte détaillée est indisponible.</p>
+                <p class="text-muted mb-0">Le propriétaire n’a pas renseigné de coordonnées.</p>
+              </div>
+            </div>
+            {% else %}
+            <div class="map-placeholder text-center p-4">
+              <div>
+                <i class="bi bi-geo-alt fs-1 text-primary d-block mb-3"></i>
+                <p class="fw-semibold mb-1">Zone approximative : {{ annonce.ville }}</p>
+                <p class="text-muted mb-3">Débloquez le contact pour consulter la carte détaillée.</p>
+                <a href="{% url 'paiements:paiement' annonce_id=annonce.pk %}" class="btn btn-primary rounded-pill px-4">
+                  Voir l'adresse exacte - 1000 FCFA
+                </a>
+              </div>
+            </div>
+            {% endif %}
           </div>
         </div>
 
@@ -322,9 +339,13 @@
               </a>
               {% endif %}
               <div class="d-grid gap-2 mb-4">
+                {% if annonce.statut == 'active' %}
+                {% if not user.is_authenticated or annonce.proprietaire.user_id != user.pk %}
                 <a href="{% url 'messagerie:envoyer_message' annonce_id=annonce.pk %}" class="btn btn-outline-primary rounded-pill">
                   <i class="bi bi-chat-dots me-2"></i> Envoyer un message
                 </a>
+                {% endif %}
+                {% endif %}
                 {% if user.is_authenticated %}
                   {% if is_favori %}
                   <form method="post" action="{% url 'messagerie:retirer_favori' annonce_id=annonce.pk %}">
@@ -354,9 +375,41 @@
 
 {% block extra_js %}
 <script>
-  function changeMainImage(src) {
-    document.getElementById('mainImage').src = src;
-  }
+  const mainGalleryImage = document.getElementById('mainImage');
+  const galleryCounter = document.getElementById('imageCounter');
+  document.querySelectorAll('[data-gallery-index]').forEach((thumbnail) => {
+    thumbnail.addEventListener('click', () => {
+      if (!mainGalleryImage) return;
+      mainGalleryImage.src = thumbnail.dataset.gallerySrc;
+      mainGalleryImage.alt = thumbnail.dataset.galleryAlt;
+      if (galleryCounter) galleryCounter.textContent = thumbnail.dataset.galleryIndex;
+      document.querySelectorAll('[data-gallery-index]').forEach((item) => {
+        item.setAttribute('aria-pressed', String(item === thumbnail));
+      });
+    });
+  });
 
 </script>
+{% if contact_debloque and annonce.latitude is not None and annonce.longitude is not None %}
+<script type="module">
+  import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
+
+  const mapElement = document.getElementById('listing-map');
+  const latitude = Number(mapElement.dataset.latitude);
+  const longitude = Number(mapElement.dataset.longitude);
+  const map = new maplibregl.Map({
+    container: mapElement,
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [longitude, latitude],
+    zoom: 16,
+    scrollZoom: false,
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'top-left');
+  new maplibregl.Marker()
+    .setLngLat([longitude, latitude])
+    .setPopup(new maplibregl.Popup().setText('Localisation du bien'))
+    .addTo(map);
+</script>
+{% endif %}
 {% endblock %}

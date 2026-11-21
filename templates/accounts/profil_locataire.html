@@ -109,12 +109,12 @@
           <a href="{% url 'annonces:recherche' %}" class="btn btn-primary btn-lg rounded-pill px-4">
             <i class="bi bi-search me-2"></i>Rechercher un logement
           </a>
-          <button type="button" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+          <a href="{% url 'accounts:modifier_profil' %}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
             <i class="bi bi-pencil-square me-2"></i>Modifier
-          </button>
+          </a>
         </div>
         <div class="text-muted small mt-3 text-lg-end">
-          Dernière connexion : aujourd'hui
+          Membre depuis le {{ user.created_at|date:'d/m/Y' }}
         </div>
       </div>
     </div>
@@ -127,7 +127,7 @@
           <span class="stat-icon"><i class="bi bi-heart"></i></span>
           <div>
             <div class="text-muted">Favoris</div>
-            <div class="fw-bold fs-4">{{ user.favoris.count|default:0 }}</div>
+            <div class="fw-bold fs-4">{{ favoris_count|default:0 }}</div>
           </div>
         </div>
         <div class="text-muted small mt-3">Annonces enregistrées pour plus tard.</div>
@@ -141,10 +141,10 @@
           </span>
           <div>
             <div class="text-muted">Contacts débloqués</div>
-            <div class="fw-bold fs-4">{{ user.contacts_debloques.count|default:0 }}</div>
+            <div class="fw-bold fs-4">{{ contacts_actifs_count|default:0 }}</div>
           </div>
         </div>
-        <div class="text-muted small mt-3">Accès actif pendant 30 jours.</div>
+        <div class="text-muted small mt-3">Accès temporaire aux coordonnées du propriétaire.</div>
       </div>
     </div>
     <div class="col-md-4">
@@ -155,10 +155,10 @@
           </span>
           <div>
             <div class="text-muted">Messages</div>
-            <div class="fw-bold fs-4">{{ user.messages_recus.count|default:0 }}</div>
+            <div class="fw-bold fs-4">{{ messages_count|default:0 }}</div>
           </div>
         </div>
-        <div class="text-muted small mt-3">Conversations en attente de réponse.</div>
+        <div class="text-muted small mt-3">Messages reçus dans votre boîte.</div>
       </div>
     </div>
   </section>
@@ -171,18 +171,18 @@
             <h2 class="h5 fw-semibold mb-1">Préférences</h2>
             <div class="text-muted small">Critères de recherche enregistrés</div>
           </div>
-          <button type="button" class="btn btn-sm btn-outline-primary rounded-pill">
+          <a href="{% url 'accounts:modifier_profil' %}#preferences" class="btn btn-sm btn-outline-primary rounded-pill">
             <i class="bi bi-sliders me-1"></i>Modifier
-          </button>
+          </a>
         </div>
 
-        <div class="d-grid gap-3">
+        <div class="d-grid gap-3" id="preferences">
           {% if locataire %}
-          <div class="p-3 bg-light rounded-4">
+          <div class="p-3 bg-body-tertiary rounded-4">
             <div class="text-muted small">Ville / Quartier</div>
             <div class="fw-semibold">{{ locataire.ville_preferee|default:"Non renseigné" }}{% if locataire.quartier_prefere %}, {{ locataire.quartier_prefere }}{% endif %}</div>
           </div>
-          <div class="p-3 bg-light rounded-4">
+          <div class="p-3 bg-body-tertiary rounded-4">
             <div class="text-muted small">Budget mensuel</div>
             <div class="fw-semibold">
               {% if locataire.budget_min or locataire.budget_max %}
@@ -193,7 +193,7 @@
             </div>
           </div>
           {% else %}
-          <div class="p-3 bg-light rounded-4">
+          <div class="p-3 bg-body-tertiary rounded-4">
             <div class="text-muted small">Aucune préférence enregistrée</div>
           </div>
           {% endif %}
@@ -213,7 +213,7 @@
           </a>
         </div>
 
-        {% if user.favoris.all %}
+        {% if favoris %}
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -226,12 +226,12 @@
               </tr>
             </thead>
             <tbody>
-              {% for favori in user.favoris.all|slice:":10" %}
+              {% for favori in favoris %}
               <tr>
                 <td>
                   <div class="d-flex align-items-center gap-3">
-                    {% if favori.annonce.images.first %}
-                    <img src="{{ favori.annonce.images.first.image.url }}" alt="Aperçu annonce" class="rounded-3" width="56" height="44" style="object-fit: cover;" />
+                    {% if favori.annonce.profile_images %}
+                    <img src="{{ favori.annonce.profile_images.0.image.url }}" alt="Aperçu annonce" class="rounded-3" width="56" height="44" style="object-fit: cover;" />
                     {% else %}
                     <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=160&q=80" alt="Aperçu annonce" class="rounded-3" width="56" height="44" style="object-fit: cover;" />
                     {% endif %}

@@ -1,74 +1,105 @@
 {% extends 'base.html' %}
-{% load static %}
 {% load socialaccount %}
 
 {% block title %}LocaHome • Connexion{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}" />
-{% endblock %}
-
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="auth-body">
-  <div class="auth-wrapper container-fluid py-5">
-    <div class="auth-card container">
-      <div class="row g-0">
-        <div class="col-lg-6 p-5">
-          <div class="mb-4">
-            <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">Bon retour</span>
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary py-4 py-lg-5">
+  <div class="container-xl">
+    <div class="card border-0 rounded-4 shadow-lg overflow-hidden mx-auto">
+      <div class="row g-0 align-items-stretch">
+        <section class="col-12 col-lg-6 p-4 p-sm-5 p-xl-5">
+          <div class="d-flex align-items-center justify-content-between mb-5">
+            <a href="{% url 'annonces:index' %}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-body fw-bold fs-5">
+              <span class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-3 p-2">
+                <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+              </span>
+              LocaHome
+            </a>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-auth-theme-toggle aria-label="Activer le mode sombre" title="Changer de thème">
+              <i class="bi bi-moon-stars-fill" aria-hidden="true"></i>
+            </button>
           </div>
-          <h1 class="display-6 fw-bold mb-3">Heureux de vous revoir</h1>
-          <p class="text-muted mb-4">
-            Aujourd'hui est un nouveau départ. Connectez-vous pour reprendre la gestion
-            de vos projets immobiliers.
+          <div class="mb-3">
+            <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis px-3 py-2">
+              <i class="bi bi-stars me-1" aria-hidden="true"></i> Bon retour
+            </span>
+          </div>
+          <h1 class="fw-bold mb-2">Heureux de vous revoir</h1>
+          <p class="text-body-secondary mb-4">
+            Connectez-vous pour retrouver vos annonces, vos messages et vos projets immobiliers.
           </p>
+          {% if messages %}
+            <div class="mb-4" aria-live="assertive">
+              {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% elif 'success' in message.tags %}alert-success{% else %}alert-info{% endif %} d-flex align-items-start gap-2 rounded-3 shadow-sm mb-2" role="alert">
+                  <i class="bi {% if 'error' in message.tags %}bi-exclamation-circle-fill{% elif 'success' in message.tags %}bi-check-circle-fill{% else %}bi-info-circle-fill{% endif %} mt-1" aria-hidden="true"></i>
+                  <div>{{ message }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
           <form method="post" action="{% provider_login_url 'google' %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-outline-secondary btn-lg btn-social w-100 mb-4">
-              <i class="bi bi-google" aria-hidden="true"></i>
+            <button type="submit" class="btn btn-outline-primary btn-lg w-100 mb-4">
+              <i class="bi bi-google me-2" aria-hidden="true"></i>
               Continuer avec Google
             </button>
           </form>
           <div class="d-flex align-items-center gap-3 mb-4" aria-hidden="true">
-            <span class="separator-line flex-grow-1"></span>
-            <span class="text-muted small">ou</span>
-            <span class="separator-line flex-grow-1"></span>
+            <hr class="flex-grow-1 my-0" />
+            <span class="text-body-secondary small">ou</span>
+            <hr class="flex-grow-1 my-0" />
           </div>
           <form method="post" class="mb-4">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}" />
             <div class="mb-3">
               <label for="login-email" class="form-label">Email</label>
-              <input type="email" class="form-control form-control-lg" id="login-email" name="email"
-                placeholder="exemple@email.com" required />
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-body"><i class="bi bi-envelope text-body-secondary" aria-hidden="true"></i></span>
+                <input type="email" class="form-control fs-6" id="login-email" name="email"
+                  placeholder="exemple@email.com" autocomplete="email" required />
+              </div>
             </div>
             <div class="mb-2">
               <label for="login-password" class="form-label">Mot de passe</label>
-              <input type="password" class="form-control form-control-lg" id="login-password" name="password"
-                placeholder="Au moins 8 caractères" minlength="8" required />
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-body"><i class="bi bi-lock text-body-secondary" aria-hidden="true"></i></span>
+                <input type="password" class="form-control fs-6" id="login-password" name="password"
+                  placeholder="Votre mot de passe" autocomplete="current-password" required />
+              </div>
             </div>
             <div class="d-flex justify-content-end mb-4">
               <a href="{% url 'accounts:password_reset' %}" class="link-primary fw-semibold text-decoration-none">Mot de passe oublié ?</a>
             </div>
-            <button type="submit" class="btn btn-dark btn-lg w-100 mb-3">
-              Se connecter
+            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3 shadow-sm">
+              Se connecter <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
             </button>
           </form>
-          <p class="text-muted">
+          <p class="text-body-secondary mb-0">
             Pas encore de compte ?
             <a href="{% url 'accounts:register' %}" class="link-primary fw-semibold text-decoration-none">Créer un
               compte</a>
           </p>
-        </div>
-        <div class="col-lg-6 d-flex flex-column p-5 order-first order-lg-last">
-          <div class="auth-visual flex-grow-1 rounded-4 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1100&q=80"
-              alt="Illustration florale" />
+        </section>
+        <aside class="col-lg-6 d-none d-lg-flex p-4" aria-label="Découvrez LocaHome">
+          <div class="position-relative flex-grow-1 overflow-hidden rounded-4 bg-dark">
+            <img class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-75"
+              src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1100&q=85"
+              alt="Salon lumineux dans un logement moderne" />
+            <div class="position-absolute bottom-0 start-0 end-0 p-4 p-xl-5 text-white">
+              <span class="badge rounded-pill text-bg-light text-primary mb-3">Votre prochain chez-vous</span>
+              <h2 class="h3 fw-bold">Un espace pour vos projets immobiliers.</h2>
+              <p class="mb-0 text-white-50">Retrouvez facilement vos échanges et vos annonces au même endroit.</p>
+            </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
+

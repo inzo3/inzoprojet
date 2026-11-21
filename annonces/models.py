@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 from accounts.models import Proprietaire
 
@@ -32,8 +33,14 @@ class Annonce(models.Model):
     ville = models.CharField(max_length=100)
     quartier = models.CharField(max_length=100)
     adresse = models.TextField()
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True,
+        validators=[MinValueValidator(-90), MaxValueValidator(90)],
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True,
+        validators=[MinValueValidator(-180), MaxValueValidator(180)],
+    )
     is_meuble = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
@@ -50,6 +57,23 @@ class Annonce(models.Model):
         return f"{self.titre} - {self.ville}"
 
 
+class VueAnnonce(models.Model):
+    """Une seule vue comptabilisée par annonce et par compte utilisateur."""
+    annonce = models.ForeignKey(Annonce, on_delete=models.CASCADE, related_name='vues_comptabilisees')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vues_annonces')
+    date_vue = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Vue d’annonce'
+        verbose_name_plural = 'Vues des annonces'
+        constraints = [
+            models.UniqueConstraint(fields=['annonce', 'user'], name='unique_vue_annonce_par_user'),
+        ]
+
+    def __str__(self):
+        return f"Vue de {self.annonce_id} par {self.user_id}"
+
+
 class ImageAnnonce(models.Model):
     """Images associées à une annonce"""
     annonce = models.ForeignKey(Annonce, on_delete=models.CASCADE, related_name='images')
@@ -60,7 +84,7 @@ class ImageAnnonce(models.Model):
     class Meta:
         verbose_name = "Image"
         verbose_name_plural = "Images"
-        ordering = ['ordre', 'id']
+        ordering = ['-is_principale', 'ordre', 'id']
     
     def __str__(self):
         return f"Image {self.ordre} - {self.annonce.titre}"

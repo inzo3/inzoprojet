@@ -28,6 +28,39 @@ body {
   background-color: #ffffff;
 }
 
+html[data-bs-theme="dark"] body {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .bg-body-tertiary {
+  color: var(--bs-body-color);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .auth-card {
+  color: var(--bs-body-color);
+  background-color: #212529;
+  border-color: #495057;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .auth-card .btn-outline-secondary {
+  color: #f8f9fa;
+  background-color: #2b3035;
+  border-color: #6c757d;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .auth-card .btn-outline-secondary:hover,
+main[data-auth-theme-scope][data-bs-theme="dark"] .auth-card .btn-outline-secondary:focus-visible {
+  color: #ffffff;
+  background-color: #343a40;
+  border-color: #adb5bd;
+}
+
 .navbar-brand span {
   color: var(--lh-primary);
 }
@@ -241,6 +274,54 @@ body {
   border-radius: 999px;
   font-weight: 600;
   box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] > section:not(.hero-section) {
+  color: #f8f9fa;
+  background-color: #212529 !important;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] > section:not(.hero-section) .text-muted,
+main[data-auth-theme-scope][data-bs-theme="dark"] > section:not(.hero-section) .text-body-secondary {
+  color: #c2c9d0 !important;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] > section:not(.hero-section) .card:not(.why-card) {
+  color: #f8f9fa;
+  background-color: #2b3035;
+  border-color: #495057;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] > section:not(.hero-section) .why-card .text-muted {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card {
+  color: #f8f9fa;
+  background-color: #161a1d;
+  border: 1px solid #495057;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card .form-control,
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card .form-select {
+  color: #f8f9fa;
+  color-scheme: dark;
+  background-color: #2b3035;
+  border-color: #6c757d;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card .form-control::placeholder {
+  color: #adb5bd;
+  opacity: 1;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card .form-select option {
+  color: #f8f9fa;
+  background-color: #2b3035;
+}
+
+main[data-auth-theme-scope][data-bs-theme="dark"] .hero-section .hero-card .form-label {
+  color: #e9ecef;
 }
 
 .logo-cloud img {

@@ -9,7 +9,10 @@ class Message(models.Model):
     """Modèle pour les messages entre utilisateurs"""
     expediteur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages_envoyes')
     destinataire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages_recus')
-    annonce = models.ForeignKey(Annonce, on_delete=models.CASCADE, related_name='messages', blank=True, null=True)
+    annonce = models.ForeignKey(Annonce, on_delete=models.SET_NULL, related_name='messages', blank=True, null=True)
+    reponse_a = models.ForeignKey(
+        'self', on_delete=models.CASCADE, related_name='reponses', blank=True, null=True
+    )
     sujet = models.CharField(max_length=200, blank=True)
     contenu = models.TextField()
     lu = models.BooleanField(default=False)

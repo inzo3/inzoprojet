@@ -29,6 +29,16 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+# Toujours accepter les hôtes locaux en développement, même si .env définit
+# ALLOWED_HOSTS pour un autre environnement.
+if DEBUG:
+    ALLOWED_HOSTS = list(dict.fromkeys([
+        *ALLOWED_HOSTS,
+        'localhost',
+        '127.0.0.1',
+        '[::1]',
+    ]))
+
 
 # Application definition
 
@@ -113,7 +123,6 @@ WSGI_APPLICATION = 'nzo.wsgi.application'
 # Modèle utilisateur personnalisé
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = '/compte/login/'
-LOGIN_REDIRECT_URL = '/'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -192,3 +201,23 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1',
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@localhost')
+
+# Sécurité des sessions et HTTPS. Les options de production peuvent être
+# activées derrière un proxy avec les variables d'environnement correspondantes.
+SESSION_COOKIE_SECURE = os.environ.get(
+    'SESSION_COOKIE_SECURE', str(not DEBUG)
+).lower() in ('true', '1', 'yes')
+CSRF_COOKIE_SECURE = os.environ.get(
+    'CSRF_COOKIE_SECURE', str(not DEBUG)
+).lower() in ('true', '1', 'yes')
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in (
+    'true', '1', 'yes'
+)
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get(
+    'SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False'
+).lower() in ('true', '1', 'yes')
+SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() in (
+    'true', '1', 'yes'
+)
+SECURE_CONTENT_TYPE_NOSNIFF = True

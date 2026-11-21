@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}LocaHome • Confirmation d'e-mail{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 text-center p-4 p-md-5">
+        {% if valid_token %}
+          <div class="text-primary mb-3"><i class="bi bi-patch-check display-4" aria-hidden="true"></i></div>
+          <h1 class="h3 fw-bold">Confirmez votre adresse</h1>
+          <p class="text-body-secondary">Appuyez sur le bouton pour activer votre compte LocaHome.</p>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Confirmer mon adresse e-mail</button>
+          </form>
+        {% else %}
+          <div class="text-danger mb-3"><i class="bi bi-link-45deg display-4" aria-hidden="true"></i></div>
+          <h1 class="h3 fw-bold">Lien invalide ou expiré</h1>
+          <p class="text-body-secondary">Ce lien de confirmation a déjà été utilisé ou n'est plus valide. Vous pouvez demander un nouveau lien.</p>
+          <a href="{% url 'accounts:resend_verification' %}" class="btn btn-primary mt-2">Renvoyer le lien</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -8,13 +8,12 @@
   <div class="container">
     <div class="row g-5 align-items-center">
       <div class="col-lg-6 text-lg-start text-center">
-        <span class="badge bg-success-subtle text-success fs-6 mb-3">Nouveau • Paiement sécurisé Mobile Money</span>
+        <span class="badge bg-success-subtle text-success fs-6 mb-3">LocaHome • Votre recherche de logement</span>
         <h1 class="display-5 fw-bold mb-3">
           Trouvez votre maison de rêve en quelques clics
         </h1>
         <p class="lead mb-4">
-          Des milliers d'annonces vérifiées. Localisation précise. Paiement
-          sécurisé. Faites confiance à LocaHome pour votre prochain logement.
+          Explorez les logements disponibles, comparez les détails et trouvez celui qui correspond à votre projet.
         </p>
         <div class="d-flex flex-wrap gap-3 justify-content-lg-start justify-content-center">
           <a href="{% url 'annonces:recherche' %}" class="btn btn-primary btn-lg rounded-pill px-4">
@@ -36,7 +35,8 @@
                 class="form-control"
                 id="city"
                 name="ville"
-                placeholder="Pointe-Noire, Brazzaville, ..."
+                placeholder="Ville ou quartier"
+                autocomplete="address-level2"
               />
             </div>
             <div class="col-md-6">
@@ -56,21 +56,21 @@
                 <option value="1">1 chambre</option>
                 <option value="2">2 chambres</option>
                 <option value="3">3 chambres</option>
-                <option value="4">4+ chambres</option>
+                <option value="4">4 chambres ou plus</option>
               </select>
             </div>
             <div class="col-12">
-              <label for="price" class="form-label">Fourchette de prix (FCFA)</label>
+              <label for="price" class="form-label">Budget maximum (FCFA/mois)</label>
               <select id="price" name="prix_max" class="form-select">
                 <option value="" selected>Choisir un budget</option>
-                <option value="50000">50 000 FCFA</option>
-                <option value="75000">75 000 FCFA</option>
-                <option value="100000">100 000 FCFA</option>
-                <option value="125000">125 000 FCFA</option>
-                <option value="150000">150 000 FCFA</option>
-                <option value="200000">200 000 FCFA</option>
-                <option value="250000">250 000 FCFA</option>
-                <option value="300000">300 000 FCFA+</option>
+                <option value="50000">Jusqu’à 50 000 FCFA</option>
+                <option value="75000">Jusqu’à 75 000 FCFA</option>
+                <option value="100000">Jusqu’à 100 000 FCFA</option>
+                <option value="125000">Jusqu’à 125 000 FCFA</option>
+                <option value="150000">Jusqu’à 150 000 FCFA</option>
+                <option value="200000">Jusqu’à 200 000 FCFA</option>
+                <option value="250000">Jusqu’à 250 000 FCFA</option>
+                <option value="300000">Jusqu’à 300 000 FCFA</option>
               </select>
             </div>
             <div class="col-12">
@@ -85,7 +85,7 @@
   </div>
 </section>
 
-<section class="py-5 bg-light">
+<section class="py-5 bg-body-tertiary">
   <div class="container">
     <div class="text-center mb-5">
       <h2 class="fw-bold">Comment ça marche ?</h2>
@@ -133,7 +133,7 @@
 </section>
 
 {% if annonces_featured %}
-<section class="py-5 bg-light">
+<section class="py-5 bg-body-tertiary">
   <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
       <div>
@@ -148,9 +148,9 @@
           {% if annonce.is_premium %}
           <span class="premium-badge">Premium</span>
           {% endif %}
-          {% if annonce.images.first %}
+          {% if annonce.homepage_images %}
           <img
-            src="{{ annonce.images.first.image.url }}"
+            src="{{ annonce.homepage_images.0.image.url }}"
             class="card-img-top"
             alt="{{ annonce.titre }}"
           />
@@ -164,9 +164,19 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="badge bg-primary-subtle text-primary">{{ annonce.prix }} FCFA / mois</span>
-              <button class="btn btn-sm btn-light rounded-circle">
-                <i class="bi bi-heart"></i>
-              </button>
+              {% if user.is_authenticated %}
+                <form method="post" action="{% if annonce.is_favori %}{% url 'messagerie:retirer_favori' annonce_id=annonce.pk %}{% else %}{% url 'messagerie:ajouter_favori' annonce_id=annonce.pk %}{% endif %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+                  <button type="submit" class="btn btn-sm {% if annonce.is_favori %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-circle" aria-label="{% if annonce.is_favori %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}" title="{% if annonce.is_favori %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+                    <i class="bi {% if annonce.is_favori %}bi-heart-fill{% else %}bi-heart{% endif %}" aria-hidden="true"></i>
+                  </button>
+                </form>
+              {% else %}
+                <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-outline-danger rounded-circle" aria-label="Connectez-vous pour ajouter aux favoris" title="Connectez-vous pour ajouter aux favoris">
+                  <i class="bi bi-heart" aria-hidden="true"></i>
+                </a>
+              {% endif %}
             </div>
             <h5 class="card-title">{{ annonce.titre }}</h5>
             <p class="text-muted mb-3">
@@ -206,9 +216,9 @@
       <div class="col">
         <div class="card border-0 shadow-sm card-hover h-100">
           <div class="position-relative">
-            {% if annonce.images.first %}
+            {% if annonce.homepage_images %}
             <img
-              src="{{ annonce.images.first.image.url }}"
+              src="{{ annonce.homepage_images.0.image.url }}"
               class="card-img-top property-thumb"
               alt="{{ annonce.titre }}"
             />
@@ -240,7 +250,7 @@
 {% endif %}
 
 {% if annonces_meubles %}
-<section class="py-5 bg-light">
+<section class="py-5 bg-body-tertiary">
   <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
       <div>
@@ -254,9 +264,9 @@
       <div class="col">
         <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
           <div class="position-relative">
-            {% if annonce.images.first %}
+            {% if annonce.homepage_images %}
             <img
-              src="{{ annonce.images.first.image.url }}"
+              src="{{ annonce.homepage_images.0.image.url }}"
               class="card-img-top property-thumb"
               alt="{{ annonce.titre }}"
             />
@@ -302,9 +312,9 @@
       <div class="col">
         <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
           <div class="position-relative">
-            {% if annonce.images.first %}
+            {% if annonce.homepage_images %}
             <img
-              src="{{ annonce.images.first.image.url }}"
+              src="{{ annonce.homepage_images.0.image.url }}"
               class="card-img-top property-thumb"
               alt="{{ annonce.titre }}"
             />
@@ -335,8 +345,46 @@
 </section>
 {% endif %}
 
+{% if annonces_villas %}
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Villas à louer</h2>
+        <p class="text-muted mb-0">Découvrez les villas actuellement proposées à la location.</p>
+      </div>
+      <a href="{% url 'annonces:recherche' %}?type=villa" class="btn btn-outline-primary rounded-pill">Voir toutes les villas</a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for annonce in annonces_villas %}
+      <div class="col">
+        <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
+          <div class="position-relative">
+            {% if annonce.homepage_images %}
+            <img src="{{ annonce.homepage_images.0.image.url }}" class="card-img-top property-thumb" alt="{{ annonce.titre }}" />
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80" class="card-img-top property-thumb" alt="{{ annonce.titre }}" />
+            {% endif %}
+            <span class="badge price-badge">{{ annonce.prix }} FCFA/mois</span>
+          </div>
+          <div class="card-body">
+            <span class="badge bg-primary-subtle text-primary mb-2">Villa</span>
+            <h5 class="card-title mb-2 lh-card-title">{{ annonce.titre }}</h5>
+            <p class="text-muted small mb-4 lh-card-meta"><i class="bi bi-geo-alt"></i> {{ annonce.ville }} • {{ annonce.nombre_chambres }} ch • {{ annonce.nombre_salles_bain }} sdb</p>
+            <div class="d-grid lh-card-actions">
+              <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-outline-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if annonces_appartements %}
-<section class="py-5 bg-light">
+<section class="py-5 bg-body-tertiary">
   <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
       <div>
@@ -350,9 +398,9 @@
       <div class="col">
         <div class="card border-0 shadow-sm card-hover h-100 lh-equal-card">
           <div class="position-relative">
-            {% if annonce.images.first %}
+            {% if annonce.homepage_images %}
             <img
-              src="{{ annonce.images.first.image.url }}"
+              src="{{ annonce.homepage_images.0.image.url }}"
               class="card-img-top property-thumb"
               alt="{{ annonce.titre }}"
             />
@@ -378,6 +426,22 @@
         </div>
       </div>
       {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if not has_homepage_listings %}
+<section class="py-5 bg-body-tertiary">
+  <div class="container">
+    <div class="card border-0 shadow-sm rounded-4 text-center p-4 p-md-5">
+      <i class="bi bi-houses display-4 text-primary mb-3" aria-hidden="true"></i>
+      <h2 class="h3 fw-bold">Les prochaines annonces arrivent bientôt</h2>
+      <p class="text-body-secondary mb-4">Aucun logement n’est actuellement disponible. Revenez bientôt ou publiez une annonce si vous êtes propriétaire.</p>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <a href="{% url 'annonces:recherche' %}" class="btn btn-outline-primary">Voir les annonces</a>
+        <a href="{% url 'annonces:annonce_create' %}" class="btn btn-primary">Publier un logement</a>
+      </div>
     </div>
   </div>
 </section>
@@ -460,3 +524,4 @@
   </div>
 </section>
 {% endblock %}
+

@@ -15,7 +15,10 @@
           </h4>
         </div>
         <div class="card-body p-4">
-          <form method="post" action="{% url 'annonces:annonce_create' %}" enctype="multipart/form-data">
+          {% if is_edit %}
+          <div class="alert alert-info" role="status">Après enregistrement, l’annonce repassera en attente de validation.</div>
+          {% endif %}
+          <form method="post" action="{% if is_edit %}{% url 'annonces:annonce_edit' pk=annonce.pk %}{% else %}{% url 'annonces:annonce_create' %}{% endif %}" enctype="multipart/form-data">
             {% csrf_token %}
             {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
@@ -58,14 +61,10 @@
                 {{ form.nombre_salles_bain }}
                 {% if form.nombre_salles_bain.errors %}<div class="text-danger small">{{ form.nombre_salles_bain.errors }}</div>{% endif %}
               </div>
-              <div class="col-md-4 d-flex align-items-end gap-3 pt-2">
+              <div class="col-md-4 d-flex align-items-end pt-2">
                 <div class="form-check">
                   {{ form.is_meuble }}
                   <label class="form-check-label" for="id_is_meuble">Meublé</label>
-                </div>
-                <div class="form-check">
-                  {{ form.is_premium }}
-                  <label class="form-check-label" for="id_is_premium">Annonce premium</label>
                 </div>
               </div>
             </div>
@@ -87,6 +86,14 @@
                 {{ form.adresse }}
                 {% if form.adresse.errors %}<div class="text-danger small">{{ form.adresse.errors }}</div>{% endif %}
               </div>
+              <div class="col-12">
+                <button type="button" id="use-current-location" class="btn btn-outline-primary btn-sm rounded-pill">
+                  <i class="bi bi-crosshair me-2"></i>Utiliser ma position actuelle
+                </button>
+                <div id="location-status" class="form-text mt-2" role="status" aria-live="polite">
+                  Autorisez la localisation pour remplir automatiquement les coordonnées de la maison.
+                </div>
+              </div>
               <div class="col-md-6">
                 <label for="id_latitude" class="form-label">Latitude (optionnel)</label>
                 {{ form.latitude }}
@@ -99,8 +106,50 @@
 
             <h6 class="fw-semibold text-muted mb-3">Photos</h6>
             <div class="mb-4">
-              <input type="file" name="images" class="form-control" accept="image/*" multiple />
-              <small class="text-muted">Plusieurs fichiers possibles. La première image sera la photo principale.</small>
+              {% if upload_errors %}
+              <div class="alert alert-danger" role="alert">
+                <ul class="mb-0">{% for error in upload_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+              </div>
+              {% endif %}
+              {% if is_edit and existing_image_rows %}
+              <div id="existing-images-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-3">
+                {% for row in existing_image_rows %}
+                {% with image=row.image %}
+                <div class="col">
+                  <div class="card h-100 p-2">
+                    <img src="{{ image.image.url }}" alt="Photo actuelle du logement" class="rounded-3 w-100" height="120" style="object-fit: cover;" />
+                    <div class="form-check mt-2">
+                      <input class="form-check-input" type="radio" name="image_main" id="image_main_{{ image.pk }}" value="{{ image.pk }}" {% if selected_primary_id == image.pk or not selected_primary_id and forloop.first %}checked{% endif %} />
+                      <label class="form-check-label" for="image_main_{{ image.pk }}">Photo principale</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="remove_images" id="remove_image_{{ image.pk }}" value="{{ image.pk }}" {% if image.pk in removed_image_ids %}checked{% endif %} />
+                      <label class="form-check-label" for="remove_image_{{ image.pk }}">Supprimer cette photo</label>
+                    </div>
+                    <label class="form-label small mt-2 mb-1" for="image_order_{{ image.pk }}">Ordre d’affichage</label>
+                    <input class="form-control form-control-sm" type="number" min="0" id="image_order_{{ image.pk }}" name="image_order_{{ image.pk }}" value="{{ row.submitted_order }}" />
+                  </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+              </div>
+              {% endif %}
+              <label for="id_images" class="form-label">{% if is_edit %}Ajouter des photos{% else %}Sélectionner les photos{% endif %}</label>
+              <input type="file" id="id_images" name="images" class="form-control" accept=".jpg,.jpeg,.png,.webp" multiple data-max-images="{{ max_announcement_images }}" data-max-file-size="5242880" />
+              <small class="text-muted">Maximum 10 photos au total, 5 Mo par photo. Formats acceptés : JPEG, PNG et WebP.</small>
+              <div id="images-selection-summary" class="small text-body-secondary mt-2" aria-live="polite">Aucune nouvelle photo sélectionnée.</div>
+              <div id="images-selection-warning" class="small text-danger mt-1" role="alert"></div>
+              <div id="images-preview" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2 mt-1"></div>
+              <div class="form-text">Si le formulaire est rejeté, sélectionnez de nouveau vos fichiers : le navigateur ne peut pas les conserver automatiquement.</div>
+              {% if is_edit %}
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="new_images_primary" id="new_images_primary" {% if new_images_primary_selected %}checked{% endif %} />
+                <label class="form-check-label" for="new_images_primary">Définir la première nouvelle photo comme principale</label>
+              </div>
+              {% else %}
+              <div class="form-text">La première photo sélectionnée sera la photo principale.</div>
+              {% endif %}
+              <div class="form-text">Les annonces modifiées repassent en validation ; leur statut Premium est attribué par l’administration.</div>
             </div>
 
             {% if equipements %}
@@ -110,7 +159,7 @@
                 {% for eq in equipements %}
                 <div class="col">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="equipements" value="{{ eq.pk }}" id="eq_{{ eq.pk }}" />
+                    <input class="form-check-input" type="checkbox" name="equipements" value="{{ eq.pk }}" id="eq_{{ eq.pk }}" {% if eq.pk in selected_equipement_ids %}checked{% endif %} />
                     <label class="form-check-label" for="eq_{{ eq.pk }}">{{ eq.nom }}</label>
                   </div>
                 </div>
@@ -131,4 +180,120 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const imageInput = document.getElementById('id_images');
+  const imageSummary = document.getElementById('images-selection-summary');
+  const imageWarning = document.getElementById('images-selection-warning');
+  const imagePreview = document.getElementById('images-preview');
+
+  if (imageInput && imageSummary && imageWarning && imagePreview) {
+    const maxImages = Number(imageInput.dataset.maxImages || 10);
+    const maxFileSize = Number(imageInput.dataset.maxFileSize || 5242880);
+    let previewUrls = [];
+
+    const formatSize = (bytes) => bytes >= 1024 * 1024
+      ? `${(bytes / (1024 * 1024)).toFixed(1)} Mo`
+      : `${Math.max(1, Math.round(bytes / 1024))} Ko`;
+
+    const updateImageSelection = () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls = [];
+      imagePreview.replaceChildren();
+
+      const files = Array.from(imageInput.files || []);
+      const keptExisting = document.querySelectorAll('#existing-images-list input[name="remove_images"]:not(:checked)').length;
+      const total = keptExisting + files.length;
+      const selectedBytes = files.reduce((sum, file) => sum + file.size, 0);
+      imageSummary.textContent = `${total} / ${maxImages} photo${total > 1 ? 's' : ''} au total · ${files.length} nouveau${files.length > 1 ? 'x' : ''} fichier${files.length > 1 ? 's' : ''} (${formatSize(selectedBytes)})`;
+
+      const warnings = [];
+      if (total > maxImages) warnings.push(`La limite est de ${maxImages} photos au total.`);
+      files.filter((file) => file.size > maxFileSize).forEach((file) => {
+        warnings.push(`${file.name} dépasse la taille maximale de 5 Mo.`);
+      });
+      imageWarning.textContent = warnings.join(' ');
+
+      files.forEach((file) => {
+        const column = document.createElement('div');
+        column.className = 'col';
+        const card = document.createElement('div');
+        card.className = 'card h-100 border-0 bg-body-tertiary p-2';
+        const image = document.createElement('img');
+        image.className = 'w-100 rounded-2';
+        image.style.height = '100px';
+        image.style.objectFit = 'cover';
+        image.alt = `Aperçu : ${file.name}`;
+        const url = URL.createObjectURL(file);
+        previewUrls.push(url);
+        image.src = url;
+        const name = document.createElement('div');
+        name.className = 'small text-truncate mt-2';
+        name.textContent = file.name;
+        const size = document.createElement('div');
+        size.className = 'small text-body-secondary';
+        size.textContent = formatSize(file.size);
+        card.append(image, name, size);
+        column.append(card);
+        imagePreview.append(column);
+      });
+    };
+
+    imageInput.addEventListener('change', updateImageSelection);
+    document.querySelectorAll('#existing-images-list input[name="remove_images"]').forEach((checkbox) => {
+      checkbox.addEventListener('change', updateImageSelection);
+    });
+    updateImageSelection();
+  }
+
+  const locationButton = document.getElementById('use-current-location');
+  const locationStatus = document.getElementById('location-status');
+  const latitudeInput = document.getElementById('id_latitude');
+  const longitudeInput = document.getElementById('id_longitude');
+
+  if (locationButton && locationStatus && latitudeInput && longitudeInput) {
+  locationButton.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      locationStatus.className = 'text-danger small mt-2';
+      locationStatus.textContent = 'La géolocalisation n’est pas prise en charge par ce navigateur.';
+      return;
+    }
+
+    const initialContent = locationButton.innerHTML;
+    locationButton.disabled = true;
+    locationButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Localisation en cours…';
+    locationStatus.className = 'form-text mt-2';
+    locationStatus.textContent = 'Demande de votre position au navigateur…';
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        latitudeInput.value = position.coords.latitude.toFixed(6);
+        longitudeInput.value = position.coords.longitude.toFixed(6);
+        locationStatus.className = 'text-success small mt-2';
+        locationStatus.textContent = 'Position enregistrée. Vérifiez les coordonnées avant de publier.';
+        locationButton.disabled = false;
+        locationButton.innerHTML = initialContent;
+      },
+      (error) => {
+        const messages = {
+          1: 'Autorisation refusée. Vous pouvez saisir les coordonnées manuellement.',
+          2: 'Position indisponible. Réessayez ou saisissez les coordonnées manuellement.',
+          3: 'La demande de position a expiré. Réessayez.',
+        };
+        locationStatus.className = 'text-danger small mt-2';
+        locationStatus.textContent = messages[error.code] || 'Impossible de récupérer votre position.';
+        locationButton.disabled = false;
+        locationButton.innerHTML = initialContent;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  });
+  }
+</script>
 {% endblock %}

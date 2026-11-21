@@ -113,16 +113,16 @@
       </div>
       <div class="col-lg-5">
         <div class="d-flex flex-column flex-sm-row gap-2 justify-content-lg-end">
-          <button type="button" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+          <a href="{% url 'accounts:modifier_profil' %}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
             <i class="bi bi-pencil-square me-2"></i>Modifier le profil
-          </button>
-          <a href="#" class="btn btn-primary btn-lg rounded-pill px-4">
+          </a>
+          <a href="{% url 'annonces:annonce_create' %}" class="btn btn-primary btn-lg rounded-pill px-4">
             <i class="bi bi-plus-circle me-2"></i>Nouvelle annonce
           </a>
         </div>
         {% if proprietaire %}
         <div class="text-muted small mt-3 text-lg-end">
-          Dernière publication : {% if proprietaire.annonces.first %}{{ proprietaire.annonces.first.created_at|timesince }}{% else %}Aucune{% endif %}
+          Dernière publication : {% if latest_listing %}{{ latest_listing.created_at|timesince }}{% else %}Aucune{% endif %}
         </div>
         {% endif %}
       </div>
@@ -149,11 +149,11 @@
             <i class="bi bi-eye"></i>
           </span>
           <div>
-            <div class="text-muted">Vues (30j)</div>
+            <div class="text-muted">Vues cumulées</div>
             <div class="fw-bold fs-4">{{ total_vues|default:0 }}</div>
           </div>
         </div>
-        <div class="text-muted small mt-3">Trafic des annonces sur 30 jours.</div>
+        <div class="text-muted small mt-3">Vues enregistrées sur toutes vos annonces.</div>
       </div>
     </div>
     <div class="col-md-3">
@@ -163,11 +163,11 @@
             <i class="bi bi-person-check"></i>
           </span>
           <div>
-            <div class="text-muted">Leads</div>
-            <div class="fw-bold fs-4">{{ nombre_messages|default:0 }}</div>
+            <div class="text-muted">Messages non lus</div>
+            <div class="fw-bold fs-4">{{ messages_non_lus|default:0 }}</div>
           </div>
         </div>
-        <div class="text-muted small mt-3">Demandes et contacts reçus.</div>
+        <div class="text-muted small mt-3">Messages à lire dans votre boîte de réception.</div>
       </div>
     </div>
     <div class="col-md-3">
@@ -178,10 +178,10 @@
           </span>
           <div>
             <div class="text-muted">Revenus (30j)</div>
-            <div class="fw-bold fs-4">0</div>
+            <div class="fw-bold fs-4">{{ revenus_30j|floatformat:0 }}</div>
           </div>
         </div>
-        <div class="text-muted small mt-3">FCFA générés via premium.</div>
+        <div class="text-muted small mt-3">FCFA reçus sur les paiements validés des 30 derniers jours.</div>
       </div>
     </div>
   </section>
@@ -194,17 +194,25 @@
             <h2 class="h5 fw-semibold mb-1">Mes annonces</h2>
             <div class="text-muted small">Gestion des biens publiés</div>
           </div>
-          <div class="d-flex gap-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill">
-              <i class="bi bi-funnel me-1"></i>Filtrer
-            </button>
-            <a href="#" class="btn btn-sm btn-primary rounded-pill">
+          <div class="d-flex flex-wrap gap-2">
+            <form method="get" class="d-flex gap-2">
+              <label class="visually-hidden" for="listing-status-filter">Filtrer par statut</label>
+              <select class="form-select form-select-sm rounded-pill" id="listing-status-filter" name="statut">
+                <option value="">Tous les statuts</option>
+                <option value="active" {% if statut_filtre == 'active' %}selected{% endif %}>Actives</option>
+                <option value="en_attente" {% if statut_filtre == 'en_attente' %}selected{% endif %}>En attente</option>
+                <option value="desactivee" {% if statut_filtre == 'desactivee' %}selected{% endif %}>Désactivées</option>
+                <option value="louee" {% if statut_filtre == 'louee' %}selected{% endif %}>Louées</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">Filtrer</button>
+            </form>
+            <a href="{% url 'annonces:annonce_create' %}" class="btn btn-sm btn-primary rounded-pill">
               <i class="bi bi-plus-circle me-1"></i>Nouvelle
             </a>
           </div>
         </div>
 
-        {% if proprietaire and proprietaire.annonces.all %}
+        {% if annonces_proprietaire %}
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -217,12 +225,12 @@
               </tr>
             </thead>
             <tbody>
-              {% for annonce in proprietaire.annonces.all|slice:":5" %}
+              {% for annonce in annonces_proprietaire %}
               <tr>
                 <td>
                   <div class="d-flex align-items-center gap-3">
-                    {% if annonce.images.first %}
-                    <img src="{{ annonce.images.first.image.url }}" alt="Aperçu annonce" class="rounded-3 listing-thumb" />
+                    {% if annonce.profile_images %}
+                    <img src="{{ annonce.profile_images.0.image.url }}" alt="Aperçu annonce" class="rounded-3 listing-thumb" />
                     {% else %}
                     <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=200&q=80" alt="Aperçu annonce" class="rounded-3 listing-thumb" />
                     {% endif %}
@@ -239,13 +247,15 @@
                   <span class="badge text-bg-success pill">Active</span>
                   {% elif annonce.statut == 'en_attente' %}
                   <span class="badge text-bg-warning pill">En attente</span>
+                  {% elif annonce.statut == 'louee' %}
+                  <span class="badge text-bg-info pill">Louée</span>
                   {% else %}
                   <span class="badge text-bg-secondary pill">Désactivée</span>
                   {% endif %}
                 </td>
                 <td class="text-end">
                   <a href="{% url 'annonces:annonce_detail' pk=annonce.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">Voir</a>
-                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill">Modifier</button>
+                  <a href="{% url 'annonces:annonce_edit' pk=annonce.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill">Modifier</a>
                 </td>
               </tr>
               {% endfor %}
@@ -256,7 +266,7 @@
         <div class="text-center py-5">
           <i class="bi bi-inbox fs-1 text-muted"></i>
           <p class="text-muted mt-3">Aucune annonce pour le moment.</p>
-          <a href="#" class="btn btn-primary rounded-pill">
+          <a href="{% url 'annonces:annonce_create' %}" class="btn btn-primary rounded-pill">
             <i class="bi bi-plus-circle me-2"></i>Créer votre première annonce
           </a>
         </div>
@@ -264,17 +274,18 @@
       </div>
 
       <div class="card panel-card p-4 mt-4">
-        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
           <div>
             <h2 class="h5 fw-semibold mb-1">Messages reçus</h2>
             <div class="text-muted small">Demandes des locataires sur vos annonces</div>
           </div>
+          <a href="{% url 'messagerie:messages_recus' %}" class="btn btn-outline-primary btn-sm rounded-pill">Voir toute la boîte{% if messages_non_lus %}<span class="badge text-bg-primary ms-2">{{ messages_non_lus }}</span>{% endif %}</a>
         </div>
 
         {% if messages_recus %}
         <div class="list-group list-group-flush">
           {% for msg in messages_recus %}
-          <div class="list-group-item px-0 py-3 {% if not msg.lu %}bg-light bg-opacity-50{% endif %} border-0 border-bottom">
+          <a href="{% url 'messagerie:detail_message' pk=msg.pk %}" class="list-group-item list-group-item-action px-3 py-3 {% if not msg.lu %}bg-primary-subtle{% endif %} border-0 border-bottom rounded-3">
             <div class="d-flex gap-3">
               <div class="flex-grow-1 min-w-0">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
@@ -290,7 +301,7 @@
                 <p class="mb-0 text-muted small">{{ msg.contenu|truncatewords:20 }}</p>
               </div>
             </div>
-          </div>
+          </a>
           {% endfor %}
         </div>
         {% else %}

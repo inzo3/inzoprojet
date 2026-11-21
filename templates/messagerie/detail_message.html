@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}LocaHome • Conversation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+      <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+        <a href="{% url 'messagerie:messages_recus' %}" class="btn btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left me-2"></i>Messages reçus</a>
+        <form method="post" action="{% url 'messagerie:supprimer_conversation' pk=message.pk %}" onsubmit="return confirm('Supprimer définitivement cette conversation ?');">
+          {% csrf_token %}<button type="submit" class="btn btn-outline-danger rounded-pill"><i class="bi bi-trash me-2"></i>Supprimer</button>
+        </form>
+      </div>
+
+      <section class="card border-0 shadow-sm rounded-4 mb-4" aria-labelledby="conversation-title">
+        <div class="card-header bg-body border-bottom py-3 rounded-top-4">
+          <h1 id="conversation-title" class="h5 fw-bold mb-1">{{ message.sujet|default:'Sans sujet' }}</h1>
+          {% if message.annonce %}<a class="small" href="{% url 'annonces:annonce_detail' pk=message.annonce.pk %}">{{ message.annonce.titre }}</a>{% else %}<span class="small text-body-secondary">Annonce supprimée</span>{% endif %}
+        </div>
+        <div class="card-body p-3 p-md-4">
+          <div class="d-grid gap-3">
+            {% for item in thread %}
+            <article class="p-3 rounded-3 {% if item.expediteur_id == request.user.pk %}bg-primary-subtle ms-md-5{% else %}bg-body-tertiary me-md-5{% endif %}">
+              <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                <strong>{{ item.expediteur.get_full_name|default:item.expediteur.username }}</strong>
+                <time class="small text-body-secondary" datetime="{{ item.date_envoi|date:'c' }}">{{ item.date_envoi|date:'d/m/Y à H:i' }}</time>
+              </div>
+              <p class="mb-0 text-break" style="white-space: pre-wrap">{{ item.contenu }}</p>
+            </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3 p-md-4">
+          <h2 class="h5 fw-semibold mb-3">Répondre</h2>
+          <form method="post" action="{% url 'messagerie:detail_message' pk=message.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="id_sujet" class="form-label">Sujet</label>
+              {{ form.sujet }}
+              {% if form.sujet.errors %}<div class="invalid-feedback d-block">{{ form.sujet.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="id_contenu" class="form-label">Votre réponse <span class="text-danger">*</span></label>
+              {{ form.contenu }}
+              {% if form.contenu.errors %}<div class="invalid-feedback d-block">{{ form.contenu.errors }}</div>{% endif %}
+            </div>
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="text-end"><button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-send me-2"></i>Envoyer la réponse</button></div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
